@@ -64,13 +64,15 @@ Editor.prototype = {
 		this._tag(tag, attr, text);
 	},
 	urlTag: function(invertSelect) {
+		var sel = this.getSel();
 		if(this.we.active) {
-			var u = prompt(this._localize("Link:"), "http://");
+			var u = this.trim(sel);
+			if(!this.isValidURI(u))
+				u = prompt(this._localize("Link:"), "http://");
 			u && this.we.insertTag("url", u);
 			return;
 		}
 		this.setInvertSelected(invertSelect);
-		var sel = this.getSel();
 		if(this.uriTagFromSel("url", sel))
 			return;
 		var u = prompt(this._localize("Link:"), "http://");
