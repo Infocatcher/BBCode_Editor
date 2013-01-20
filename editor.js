@@ -66,6 +66,12 @@ Editor.prototype = {
 	urlTag: function(invertSelect) {
 		var sel = this.getSel();
 		if(this.we.active) {
+			//~ todo: try detect selected link
+			//if(this.we.editorFocused()) {
+			//	this.we.focus();
+			//	var s = window.getSelection().getRangeAt(0).commonAncestorContainer;
+			//	alert(s.parentNode.nodeName);
+			//}
 			var u = this.trim(sel);
 			if(!this.isValidURI(u))
 				u = prompt(this._localize("Link:"), "http://");
