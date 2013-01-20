@@ -376,7 +376,7 @@ WysiwygEditor.prototype = {
 		);
 	},
 	focus: function() {
-		this.ww.focus && this.ww.focus(); //~ todo: doesn't works in Opera
+		this.ww.focus && this.ww.focus(); //~ todo: doesn't work in Opera
 	},
 	select: function() {
 		if(!this.__editor.selectInserted) {
