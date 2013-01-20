@@ -5,7 +5,7 @@
 .resizer-container tr, .resizer-container td {
 	margin: 0; padding: 0;
 }
-.jsEnabled .resizer-textarea {
+.jsEnabled .editor-textarea {
 	border-top: 1px solid #c0c0c0;
 	border-right: none;
 	border-bottom: none;
@@ -35,4 +35,13 @@
 }
 .resize-right-bottom, .resize-right-bottom * {
 	cursor: nw-resize !important;
+}
+
+.editor-wysiwyg {
+	overflow: auto;
+	resize: both;
+
+	border-left: 1px solid #c0c0c0;
+	border-top: 1px solid #c0c0c0;
+	outline: none !important;
 }

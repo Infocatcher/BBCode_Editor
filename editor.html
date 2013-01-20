@@ -4,7 +4,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<meta name="author" content="Infocatcher" />
 	<meta name="copyright" content="&copy; Infocatcher 2009-2012" />
-	<title>BBCode Editor [version 0.3.4 - 2012-02-14]</title>
+	<title>BBCode Editor [version 0.4.0a1 - 2012-02-06]</title>
 	<style type="text/css">
 	/*<![CDATA[*/
 		html, body { margin: 0; background: white; }
@@ -35,7 +35,8 @@
 		<table class="resizer-container">
 			<tr>
 				<td>
-					<textarea id="ta" class="resizer-textarea" cols="60" rows="10"></textarea>
+					<textarea id="ta" class="editor-textarea" cols="60" rows="10">
+					</textarea><div class="editor-wysiwyg" contenteditable="true" style="display: none;"></div>
 				</td>
 				<td class="resizer-right forJsEnabled"><div class="resizer-right"><!-- dummy div --></div></td>
 			</tr>
@@ -52,6 +53,13 @@
 		<div id="buttons" class="forJsEnabled">
 			<button onclick="bbCode.tag(event, 'b');" accesskey="B">B</button>
 			<button onclick="bbCode.tag(event, 'i');" accesskey="I">I</button>
+			<button onclick="bbCode.tag(event, 'u');" accesskey="N">U</button>
+			<button onclick="bbCode.tag(event, 's');" accesskey="S">S</button>
+
+			<button onclick="bbCode.tag(event, 'sub');">Sub</button>
+			<button onclick="bbCode.tag(event, 'sup');">Sup</button>
+			<button onclick="bbCode.tag(event, 'pre');">Pre</button>
+
 			<button onclick="bbCode.urlTag(event);" accesskey="U">URL</button>
 			<button onclick="bbCode.imgTag(event);" accesskey="M">IMG</button>
 			<button onclick="bbCode.quoteTag(event);" accesskey="Q">Quote</button>
@@ -70,8 +78,22 @@
 				with(document.getElementsByTagName("select")[0])
 					style.color = value;
 			</script>
+			<button onclick="wysiwyg.removeFormatting();">RemoveFormatting</button>
+			<button onclick="alert(isWysiwyg ? wysiwyg.getBBCode() : wysiwyg.getHTML());">GetAlternate</button>
 		</div>
 		<div id="settings" class="forJsEnabled">
+			<span onchange="wysiwyg.toggle();">
+			Editor:
+			<label for="editor-mode-plain">
+				<input name="editor-mode" value="plain" id="editor-mode-plain" type="radio" />
+				plain
+			</label>
+			<label for="editor-mode-wysisyg">
+				<input name="editor-mode" value="wysisyg" id="editor-mode-wysisyg" type="radio" />
+				visual
+			</label>
+			</span>
+
 			<label for="selectInserted">
 				<input id="selectInserted" type="checkbox"
 					onclick="bbCode.selectInserted = this.checked; bbCode.getTa().focus();" />
@@ -81,6 +103,7 @@
 	</div>
 	<script type="text/javascript">
 		bbCode.selectInserted = document.getElementById("selectInserted").checked;
+		var wysiwyg = new Wysiwyg(document.getElementsByTagName("textarea")[0]);
 	</script>
 </body>
 </html>

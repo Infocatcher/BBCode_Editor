@@ -1,8 +1,469 @@
 // (c) Infocatcher 2009-2012
-// version 0.3.4 - 2012-02-14
+// version 0.4.0a1 - 2012-02-06
 
 // Dependencies:
 //   eventListener object - eventListener.js
+
+var isWysiwyg = false; //~ todo: use another way to store state
+
+function Wysiwyg(ta) {
+	this.ta = ta;
+	this.init();
+}
+Wysiwyg.prototype = {
+	init: function() {
+		//var ww = this.ww = document.createElement("div");
+		//ww.className = "editor-wysiwyg";
+
+		this.ww = this.ta.nextSibling;
+
+		this.toggle();
+		//ww.contentEditable = "true";
+		//this.ta.parentNode.insertBefore(ww, this.ta.nextSibling);
+		eventListener.add(window, "unload", function destroy() {
+			eventListener.remove(window, "unload", destroy);
+			if(isWysiwyg)
+				this.ta.value = this.getBBCode(); // Fails... =(
+		}, this);
+	},
+	toggle: function() {
+		if(!this.available()) {
+			alert("WYSIWYG is not available :(");
+			this.ww.style.display = "none";
+			return;
+		}
+		var wwMode = this.ta.style.display != "none";
+		var show = wwMode ? this.ww : this.ta;
+		var hide = wwMode ? this.ta : this.ww;
+		show.style.width  = resizer.getStyle(hide, "width");
+		show.style.height = resizer.getStyle(hide, "height");
+		if(wwMode)
+			show.innerHTML = this.getHTML();
+		else
+			show.value = this.getBBCode();
+		show.style.display = "";
+		hide.style.display = "none";
+		show.focus && show.focus();
+		isWysiwyg = wwMode;
+
+		//~ todo: use options instead of hardcoded ids
+		document.getElementById(wwMode ? "editor-mode-wysisyg" : "editor-mode-plain").checked = true;
+
+		// Hack for Firefox 10 - 13.0a1
+		// With sibling <div> doubleclick in textarea doesn't select word
+		if(wwMode)
+			this.ta.parentNode.insertBefore(this.ww, this.ta.nextSibling);
+		else
+			this.ta.parentNode.removeChild(this.ww);
+	},
+	available: function() {
+		var ok = "execCommand" in document;
+		this.available = function() {
+			return ok;
+		};
+		return ok;
+	},
+	getFocusedNode: function() {
+		//~ todo: use another way in ond browsers
+		if("activeElement" in document)
+			return document.activeElement;
+		if("querySelector" in document)
+			return document.querySelector(":focus");
+		return null;
+	},
+	useTags: function() {
+		// Firefox bug (?)
+		// Without this we can get inline styles for <div contenteditable="true">
+		// And styles like <div contenteditable="true" style="... font-weight: bold;">
+		// can't be removed with "removeformat" command.
+		try {
+			//~ todo: "useCSS" for old versions?
+			document.execCommand("styleWithCSS", false, false);
+		}
+		catch(e) {
+		}
+	},
+	insert: function(cmd, arg) {
+		switch(cmd) {
+			case "b": cmd = "bold"; break;
+			case "i": cmd = "italic"; break;
+			case "u": cmd = "underline"; break;
+			case "s": cmd = "strikeThrough"; break;
+
+			case "font": cmd = "fontName"; break;
+			case "size": cmd = "fontSize"; break;
+			case "color": cmd = "foreColor"; break;
+			case "hr": cmd = "insertHorizontalRule"; break;
+
+			case "img": cmd = "insertImage"; break;
+			case "url": cmd = "createlink"; break;
+
+			case "center": cmd = "justifyCenter"; break;
+			case "left": cmd = "justifyLeft"; break;
+			case "right": cmd = "justifyRight"; break;
+
+			case "sub": cmd = "subscript"; break;
+			case "sup": cmd = "superscript"; break;
+
+			case "pre": cmd = "formatBlock", arg = "<pre>"; break;
+		}
+		this.useTags();
+		document.execCommand(cmd, false, arg || null);
+		this.ww.focus && this.ww.focus();
+	},
+	insertHTML: function(html) {
+		if(document.selection && document.selection.createRange)
+			doc.selection.createRange().pasteHTML(html);
+		else
+			document.execCommand("insertHTML", false, html);
+	},
+	removeFormatting: function() {
+		document.execCommand("removeFormat", false, null);
+	},
+	getHTML: function() {
+		//~ not implemented
+		if("console" in window && "warn" in console)
+			console.warn("Note: getHTML() not fully implemented");
+		var _this = this;
+		var bb = this.ta.value
+			.replace(/\[b\]/ig, "<strong>")
+			.replace(/\[\/b\]/ig, "</strong>")
+			.replace(/\[i\]/ig, "<em>")
+			.replace(/\[\/i\]/ig, "</em>")
+			.replace(/\[u\]/ig, "<ins>")
+			.replace(/\[\/u\]/ig, "</ins>")
+			.replace(/\[s\]/ig, "<del>")
+			.replace(/\[\/s\]/ig, "</del>")
+
+			.replace(/\[pre\]/ig, "<pre>")
+			.replace(/\[\/pre\](?:\r\n?|\n\r?)?/ig, "</pre>")
+
+			.replace(/\[sub\]/ig, "<sub>")
+			.replace(/\[\/sub\]/ig, "</sub>")
+			.replace(/\[sup\]/ig, "<sup>")
+			.replace(/\[\/sup\]/ig, "</sup>")
+
+			.replace(/\[color=('|")?(#[\da-f]{3}|#[\da-f]{6}|[a-z]{3,})\1\]/ig, function(s, comma, color) {
+				return '<span style="color: ' + color + ';">';
+			})
+			.replace(/\[\/color\]/ig, "</span>")
+			.replace(/\[url\](.*?)\[\/url\]/ig, function(s, url) {
+				if(!/^(?:https?|ftps?):\/\//i.test(url) && !/^mailto:/i.test(url))
+					url = "http://" + url;
+				url = _this.encodeHTML(url);
+				return '<a href="' + url + '" title="' + url + '">' + url + '</a>';
+			})
+			.replace(/\[url=(.*?)\]([\s\S]*?)\[\/url\]/ig, function(s, url, text) {
+				if(!/^(?:https?|ftps?):\/\//i.test(url) && !/^mailto:/i.test(url))
+					url = "http://" + url;
+				url = _this.encodeHTML(url);
+				return '<a href="' + url + '" title="' + url + '">' + text + '</a>';
+			})
+			.replace(/\[img\](\S+?)\[\/img\]/ig, function(s, src) {
+				if(!/^(?:https?|ftps?):\/\//i.test(src))
+					src = "http://" + src;
+				src = _this.encodeHTML(src); //?
+				return '<img src="' + src + '" alt="[img]"></img>';
+			})
+			//~ todo: smileys
+
+			.replace(/\[hr(\s*\/)?\]/g, "<hr>")
+			.replace(/\[br(\s*\/)?\]/g, "<br>")
+			.replace(/\r\n?|\n\r?/g, "<br>")
+		;
+		return bb;
+	},
+	encodeHTML: function(s) {
+		return s
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;");
+	},
+	decodeHTML: function(s) {
+		return s
+			.replace(/&lt;/g, "<")
+			.replace(/&gt;/g, ">")
+			.replace(/&quot;/g, '"')
+			.replace(/&amp;/g, "&");
+	},
+	getBBCode: function(node) {
+		if(!node)
+			node = this.ww;
+		else if(node.nodeType == 3 /*Node.TEXT_NODE*/)
+			return this._getNodeText(node);
+
+		var ret = "";
+
+		var tagOpen = "";
+		var tagClose = "";
+
+		if(node != this.ww) {
+			var nn = node.nodeName.toLowerCase();
+			if(nn == "br")
+				return "\n";
+
+			var isLink = nn == "a" && node.href;
+
+			if(isLink) { //~ todo: visited links
+				if("_dummyLink" in this)
+					var dummyLink = this._dummyLink;
+				else {
+					var dummyLink = document.createElement("a");
+					dummyLink.id = "_wysiwygDummyLink";
+					dummyLink.href = "#" + dummyLink.id;
+					this.ww.parentNode.appendChild(dummyLink);
+					this._dummyLink = dummyLink;
+				}
+				var linkStyles = this.getStyles(dummyLink);
+			}
+
+			var styles = this.getStyles(node);
+			//var isFirstLevel = node.parentNode == this.ww;
+			var parentStyles = this.getStyles(node.parentNode);
+
+			var isNew = function(prop) {
+				var isNew = styles[prop] != parentStyles[prop];
+				if(isNew && isLink)
+					return styles[prop] != linkStyles[prop];
+				return isNew;
+			};
+			if((styles.fontWeight == "bold" || Number(styles.fontWeight) > 400) && isNew("fontWeight"))
+				tagOpen += "[b]", tagClose = "[/b]" + tagClose;
+			if(styles.fontStyle == "italic" && isNew("fontStyle"))
+				tagOpen += "[i]", tagClose = "[/i]" + tagClose;
+			if(
+				/(^|\s)underline(\s|$)/i.test(styles.textDecoration)
+				&& (!parentStyles || !/(^|\s)underline(\s|$)/i.test(parentStyles.textDecoration))
+				&& (!isLink || !/(^|\s)underline(\s|$)/i.test(linkStyles.textDecoration))
+			)
+				tagOpen += "[u]", tagClose = "[/u]" + tagClose;
+			if(
+				/(^|\s)line-through(\s|$)/i.test(styles.textDecoration)
+				&& (!parentStyles || !/(^|\s)line-through(\s|$)/i.test(parentStyles.textDecoration))
+				&& (!isLink || !/(^|\s)line-through(\s|$)/i.test(linkStyles.textDecoration))
+			)
+				tagOpen += "[s]", tagClose = "[/s]" + tagClose;
+			if(/(^|-)pre(-|$)/.test(styles.whiteSpace) && isNew("whiteSpace"))
+				tagOpen += "[pre]", tagClose = "[/pre]" + tagClose;
+			if(styles.verticalAlign == "sub" && isNew("verticalAlign"))
+				tagOpen += "[sub]", tagClose = "[/sub]" + tagClose;
+			if(styles.verticalAlign == "super" && isNew("verticalAlign"))
+				tagOpen += "[sup]", tagClose = "[/sup]" + tagClose;
+			if(styles.color && isNew("color")) {
+				tagOpen += "[color=" + this.convertColor(styles.color) + "]"; //~ todo
+				tagClose = "[/color]" + tagClose;
+			}
+			if(isLink) {
+				//tagOpen += "[url=" + node.href + "]";
+				tagOpen += node.href == this.decodeHTML(node.innerHTML) ? "[url]" : "[url=" + node.href + "]";
+				console.log(node.href);
+				console.log(node.innerHTML);
+				tagClose = "[/url]" + tagClose;
+			}
+			if(styles.display == "block")
+				tagClose += "\n";
+			if(nn == "img" && node.src) {
+				//~ todo: smileys
+				tagOpen += "[img]";
+				tagClose = "[/img]" + tagClose;
+				return tagOpen + node.src + tagClose;
+			}
+		}
+
+		ret += tagOpen;
+
+		var childs = node.childNodes;
+		for(var i = 0, l = childs.length; i < l; ++i) {
+			var child = childs[i];
+			ret += this.getBBCode(child);
+		}
+
+		ret += tagClose;
+
+		return ret;
+	},
+	getStyles: function(node) {
+		return window.getComputedStyle
+			? window.getComputedStyle(node, null)
+			: node.currentStyle; // IE
+	},
+	convertColor: function(color) {
+		if(/^#[\da-f]{6}$/i.test(color))
+			return this.getColorName(color.toLowerCase());
+		if(/^#[\da-f]{3}$/i.test(color)) {
+			var cs = color.split("");
+			return this.getColorName("#" + (cs[1] + cs[1] + cs[2] + cs[2] + cs[3] + cs[3]).toLowerCase());
+		}
+		if(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/.test(color))
+			return this.getColorName(
+				"#"
+				+ this.padLeft(Number(RegExp.$1).toString(16))
+				+ this.padLeft(Number(RegExp.$2).toString(16))
+				+ this.padLeft(Number(RegExp.$3).toString(16))
+			);
+		return color;
+	},
+	padLeft: function(n) {
+		var chr = "0";
+		var cnt = 2;
+		n = String(n);
+		var l = n.length;
+		return l < cnt
+			? new Array(cnt - n.length + 1).join(chr) + n
+			: n;
+	},
+	colors: {
+		"#f0f8ff": "AliceBlue",
+		"#faebd7": "AntiqueWhite",
+		"#00ffff": "Aqua",
+		"#7fffd4": "Aquamarine",
+		"#f0ffff": "Azure",
+		"#f5f5dc": "Beige",
+		"#ffe4c4": "Bisque",
+		"#000000": "Black",
+		"#ffebcd": "BlanchedAlmond",
+		"#0000ff": "Blue",
+		"#8a2be2": "BlueViolet",
+		"#a52a2a": "Brown",
+		"#deb887": "BurlyWood",
+		"#5f9ea0": "CadetBlue",
+		"#7fff00": "Chartreuse",
+		"#d2691e": "Chocolate",
+		"#ff7f50": "Coral",
+		"#6495ed": "CornflowerBlue",
+		"#fff8dc": "Cornsilk",
+		"#dc143c": "Crimson",
+		//"#00ffff": "Cyan",
+		"#00008b": "DarkBlue",
+		"#008b8b": "DarkCyan",
+		"#b8860b": "DarkGoldenRod",
+		"#a9a9a9": "DarkGray",
+		"#006400": "DarkGreen",
+		"#bdb76b": "DarkKhaki",
+		"#8b008b": "DarkMagenta",
+		"#556b2f": "DarkOliveGreen",
+		"#ff8c00": "Darkorange",
+		"#9932cc": "DarkOrchid",
+		"#8b0000": "DarkRed",
+		"#e9967a": "DarkSalmon",
+		"#8fbc8f": "DarkSeaGreen",
+		"#483d8b": "DarkSlateBlue",
+		"#2f4f4f": "DarkSlateGray",
+		"#00ced1": "DarkTurquoise",
+		"#9400d3": "DarkViolet",
+		"#ff1493": "DeepPink",
+		"#00bfff": "DeepSkyBlue",
+		"#696969": "DimGray",
+		"#1e90ff": "DodgerBlue",
+		"#b22222": "FireBrick",
+		"#fffaf0": "FloralWhite",
+		"#228b22": "ForestGreen",
+		//"#ff00ff": "Fuchsia",
+		"#dcdcdc": "Gainsboro",
+		"#f8f8ff": "GhostWhite",
+		"#ffd700": "Gold",
+		"#daa520": "GoldenRod",
+		"#808080": "Gray",
+		"#008000": "Green",
+		"#adff2f": "GreenYellow",
+		"#f0fff0": "HoneyDew",
+		"#ff69b4": "HotPink",
+		"#cd5c5c": "IndianRed",
+		"#4b0082": "Indigo",
+		"#fffff0": "Ivory",
+		"#f0e68c": "Khaki",
+		"#e6e6fa": "Lavender",
+		"#fff0f5": "LavenderBlush",
+		"#7cfc00": "LawnGreen",
+		"#fffacd": "LemonChiffon",
+		"#add8e6": "LightBlue",
+		"#f08080": "LightCoral",
+		"#e0ffff": "LightCyan",
+		"#fafad2": "LightGoldenRodYellow",
+		"#90ee90": "LightGreen",
+		"#d3d3d3": "LightGrey",
+		"#ffb6c1": "LightPink",
+		"#ffa07a": "LightSalmon",
+		"#20b2aa": "LightSeaGreen",
+		"#87cefa": "LightSkyBlue",
+		"#778899": "LightSlateGray",
+		"#b0c4de": "LightSteelBlue",
+		"#ffffe0": "LightYellow",
+		"#00ff00": "Lime",
+		"#32cd32": "LimeGreen",
+		"#faf0e6": "Linen",
+		"#ff00ff": "Magenta",
+		"#800000": "Maroon",
+		"#66cdaa": "MediumAquaMarine",
+		"#0000cd": "MediumBlue",
+		"#ba55d3": "MediumOrchid",
+		"#9370db": "MediumPurple",
+		"#3cb371": "MediumSeaGreen",
+		"#7b68ee": "MediumSlateBlue",
+		"#00fa9a": "MediumSpringGreen",
+		"#48d1cc": "MediumTurquoise",
+		"#c71585": "MediumVioletRed",
+		"#191970": "MidnightBlue",
+		"#f5fffa": "MintCream",
+		"#ffe4e1": "MistyRose",
+		"#ffe4b5": "Moccasin",
+		"#ffdead": "NavajoWhite",
+		"#000080": "Navy",
+		"#fdf5e6": "OldLace",
+		"#808000": "Olive",
+		"#6b8e23": "OliveDrab",
+		"#ffa500": "Orange",
+		"#ff4500": "OrangeRed",
+		"#da70d6": "Orchid",
+		"#eee8aa": "PaleGoldenRod",
+		"#98fb98": "PaleGreen",
+		"#afeeee": "PaleTurquoise",
+		"#db7093": "PaleVioletRed",
+		"#ffefd5": "PapayaWhip",
+		"#ffdab9": "PeachPuff",
+		"#cd853f": "Peru",
+		"#ffc0cb": "Pink",
+		"#dda0dd": "Plum",
+		"#b0e0e6": "PowderBlue",
+		"#800080": "Purple",
+		"#ff0000": "Red",
+		"#bc8f8f": "RosyBrown",
+		"#4169e1": "RoyalBlue",
+		"#8b4513": "SaddleBrown",
+		"#fa8072": "Salmon",
+		"#f4a460": "SandyBrown",
+		"#2e8b57": "SeaGreen",
+		"#fff5ee": "SeaShell",
+		"#a0522d": "Sienna",
+		"#c0c0c0": "Silver",
+		"#87ceeb": "SkyBlue",
+		"#6a5acd": "SlateBlue",
+		"#708090": "SlateGray",
+		"#fffafa": "Snow",
+		"#00ff7f": "SpringGreen",
+		"#4682b4": "SteelBlue",
+		"#d2b48c": "Tan",
+		"#008080": "Teal",
+		"#d8bfd8": "Thistle",
+		"#ff6347": "Tomato",
+		"#40e0d0": "Turquoise",
+		"#ee82ee": "Violet",
+		"#f5deb3": "Wheat",
+		"#ffffff": "White",
+		"#f5f5f5": "WhiteSmoke",
+		"#ffff00": "Yellow",
+		"#9acd32": "YellowGreen"
+	},
+	getColorName: function(color) {
+		if(color in this.colors)
+			return this.colors[color];
+		return color;
+	},
+	_getNodeText: function(node) {
+		return node.textContent || node.innerText || node.nodeValue || "";
+	}
+};
 
 var bbCode = {
 	//== Settings begin
@@ -42,10 +503,19 @@ var bbCode = {
 		this._insert(text);
 	},
 	tag: function(invertSelect, tag, attr, text) {
+		if(isWysiwyg) {
+			wysiwyg.insert(tag, attr);
+			return;
+		}
 		this.setInvertSelected(invertSelect);
 		this._tag(tag, attr, text);
 	},
 	urlTag: function(invertSelect) {
+		if(isWysiwyg) {
+			var u = prompt(this._localize("Link:"), "http://");
+			u && wysiwyg.insert("url", u);
+			return;
+		}
 		this.setInvertSelected(invertSelect);
 		var sel = this.getSel();
 		if(this.uriTagFromSel("url", sel))
@@ -69,8 +539,8 @@ var bbCode = {
 		if(author == null)
 			return;
 		var origComma = this.attrComma;
+		var comma = origComma;
 		if(/\[|\]/.test(author)) {
-			var comma = origComma;
 			if(author.indexOf("'") != -1)
 				comma = '"';
 			else if(author.indexOf('"') != -1)
@@ -79,10 +549,6 @@ var bbCode = {
 				comma = '"';
 			this.attrComma = comma;
 		}
-		else if(/^".*"$/.test(author))
-			this.attrComma = "'";
-		else if(/^'.*'$/.test(author))
-			this.attrComma = '"';
 		this._tag("quote", author);
 		this.attrComma = origComma;
 	},
@@ -203,7 +669,10 @@ var resizer = {
 	noHorizScroll: true,
 	addHeight: 120,
 	getArea: function(rsElt) {
-		return rsElt.parentNode.parentNode.getElementsByTagName("textarea")[0];
+		var ta = rsElt.parentNode.parentNode.getElementsByTagName("textarea")[0];
+		if(ta.style.display != "none")
+			return ta;
+		return ta.nextSibling;
 	},
 	//== Settings end
 
@@ -227,6 +696,8 @@ var resizer = {
 	startResize: function(e) {
 		if(e.button != 0)
 			return;
+		if(this.area)
+			this.stopResize();
 		var tar = e.target;
 		var rsType = this.getResizeType(e);
 		if(!rsType)
