@@ -82,6 +82,13 @@ Editor.prototype = {
 			this._tag("url", false, u);
 	},
 	imgTag: function(invertSelect) {
+		if(this.we.active) {
+			var u = this.trim(this.getSel());
+			if(!this.isValidURI(u))
+				u = prompt(this._localize("Link to image:"), "http://");
+			u && this.we.insertTag("img", u);
+			return;
+		}
 		this.setInvertSelected(invertSelect);
 		if(this.uriTagFromSel("img"))
 			return;
