@@ -359,6 +359,9 @@ WysiwygEditor.prototype = {
 
 			case "pre": cmd = "formatBlock", arg = "<pre>"; break;
 		}
+		this.execCommand(cmd, arg);
+	},
+	execCommand: function(cmd, arg) {
 		this._useTags();
 		document.execCommand(cmd, false, arg || null);
 		this.focus();
@@ -430,7 +433,7 @@ WysiwygEditor.prototype = {
 	removeFormatting: function() {
 		if(!this.editorFocused())
 			return;
-		document.execCommand("removeFormat", false, null);
+		this.execCommand("removeFormat");
 	},
 
 	getSelectionHTML: function() {
