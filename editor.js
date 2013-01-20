@@ -1,38 +1,262 @@
 // (c) Infocatcher 2009-2012
-// version 0.4.0a1 - 2012-02-06
+// version 0.4.0a2 - 2012-02-07
 
 // Dependencies:
 //   eventListener object - eventListener.js
 
-var isWysiwyg = false; //~ todo: use another way to store state
+function Editor(ta, options) {
+	ta = this.ta = this.$(ta);
+	if(options)
+		for(var p in options)
+			this[p] = options[p];
+	this.we = new WysiwygEditor(ta);
+	this.we.__editor = this;
+	this.onWysiwygToggle();
+}
+Editor.prototype = {
+	//== Settings begin
+	language: "ru",
+	selectInserted: false,
+	attrComma: "", // Empty string or '"'
+	validURIMask: /^(\w+:\/+[^\s\/\\'"?&#]+(\/\S*)?|\w+:[^\s\/\\'"?&#]+)$/,
+	onlyTagsMask: /^\[(\w+)([^\[\]]+)?\](\[\/\1\])$/,
+	onlyTagsCloseTagNum: 3, // Number of brackets with ([/tag])
+	//== Settings end
 
-function Wysiwyg(ta) {
+	strings: {
+		"Link:": {
+			ru: "Ссылка:"
+		},
+		"Link to image:": {
+			ru: "Ссылка на изображение:"
+		},
+		"Link description (you can leave this field empty):": {
+			ru: "Описание ссылки (можно оставить поле пустым):"
+		},
+		"Quote author (you can leave this field empty):": {
+			ru: "Автор цитаты (можно оставить поле пустым):"
+		}
+	},
+	_localize: function(s) {
+		return this.strings[s] && this.strings[s][this.language] || s;
+	},
+
+	//== API begin
+	insert: function(invertSelect, text) {
+		this.setInvertSelected(invertSelect);
+		this._insert(text);
+	},
+	tag: function(invertSelect, tag, attr, text) {
+		if(this.we.active) {
+			this.we.insert(tag, attr);
+			return;
+		}
+		this.setInvertSelected(invertSelect);
+		this._tag(tag, attr, text);
+	},
+	urlTag: function(invertSelect) {
+		if(this.we.active) {
+			var u = prompt(this._localize("Link:"), "http://");
+			u && this.we.insert("url", u);
+			return;
+		}
+		this.setInvertSelected(invertSelect);
+		var sel = this.getSel();
+		if(this.uriTagFromSel("url", sel))
+			return;
+		var u = prompt(this._localize("Link:"), "http://");
+		if(u && sel)
+			this._tag("url", u);
+		else if(u != null)
+			this._tag("url", false, u);
+	},
+	imgTag: function(invertSelect) {
+		this.setInvertSelected(invertSelect);
+		if(this.uriTagFromSel("img"))
+			return;
+		var u = prompt(this._localize("Link to image:"), "http://");
+		u && this._tag("img", false, u);
+	},
+	quoteTag: function(invertSelect) {
+		this.setInvertSelected(invertSelect);
+		var author = prompt(this._localize("Quote author (you can leave this field empty):"), "");
+		if(author == null)
+			return;
+		var origComma = this.attrComma;
+		var comma = origComma;
+		if(/\[|\]/.test(author)) {
+			if(author.indexOf("'") != -1)
+				comma = '"';
+			else if(author.indexOf('"') != -1)
+				comma = "'";
+			else if(!comma)
+				comma = '"';
+			this.attrComma = comma;
+		}
+		this._tag("quote", author);
+		this.attrComma = origComma;
+	},
+	toggle: function(visualMode) {
+		if(visualMode != undefined && visualMode == this.we.active)
+			return;
+		this.we.toggle();
+		this.onWysiwygToggle();
+	},
+	onWysiwygToggle: function() {
+		var root = document.documentElement || document.body;
+		this.setClass(root, "editor-mode-plain", !this.we.active);
+		this.setClass(root, "editor-mode-wysiwyg", this.we.active);
+		if("onToggle" in this)
+			this.onToggle(this.we.active);
+	},
+	focus: function() {
+		if(this.we.active)
+			this.we.ww.focus();
+		else
+			this.ta.focus();
+	},
+
+	//== API end
+
+	$: function(id) {
+		if(typeof id == "string")
+			return document.getElementById(id) || document.getElementsByName(id)[0];
+		return id;
+	},
+	getSel: function() {
+		var ta = this.ta;
+		if(typeof ta.selectionStart == "number") {
+			return String(
+				window.getSelection && window.getSelection()
+				|| document.getSelection && document.getSelection()
+			) || ta.value.substring(ta.selectionStart, ta.selectionEnd);
+		}
+		return document.selection && document.selection.createRange().text || "";
+	},
+	setInvertSelected: function(e) {
+		if(e === undefined)
+			e = window.event;
+		this.invertSelect = e && typeof e == "object"
+			? e.ctrlKey || e.shiftKey || e.altKey || e.metaKey
+			: e;
+	},
+	getSelectInserted: function(invertSelect) {
+		var si = this.selectInserted;
+		if(this.invertSelect) {
+			this.invertSelect = false;
+			si = !si;
+		}
+		return si;
+	},
+	_tag: function(tag, attr, text, start, end) {
+		this._insert(
+			(start || "")
+			+ "[" + tag + (attr ? "=" + this.attrComma + attr + this.attrComma : "") + "]"
+			+ (text || this.getSel())
+			+ "[/" + tag + "]"
+			+ (end || "")
+		);
+	},
+	_insert: function(text) {
+		var ta = this.ta;
+		ta.focus();
+		var onlyTagsShift = this.onlyTagsMask.test(text) ? RegExp["$" + this.onlyTagsCloseTagNum].length : 0;
+		if(typeof ta.selectionStart == "number") {
+			var sTop = ta.scrollTop;
+			var sHeight = ta.scrollHeight;
+			var sLeft = ta.scrollLeft;
+			// var sWidth = ta.scrollWidth;
+
+			var ss = ta.selectionStart;
+			var val = ta.value;
+			ta.value = val.substring(0, ss) + text + val.substring(ta.selectionEnd, val.length);
+			var se = ss + text.length - onlyTagsShift;
+			ta.selectionStart = this.getSelectInserted() && !onlyTagsShift ? ss : se;
+			ta.selectionEnd = se;
+
+			ta.scrollTop = sTop + (ta.scrollHeight - sHeight);
+			ta.scrollLeft = sLeft; // + (ta.scrollWidth - sWidth);
+		}
+		else if(document.selection) { // IE
+			var r = document.selection.createRange();
+			r.text = text;
+			if(onlyTagsShift)
+				r.moveEnd("character", -onlyTagsShift);
+			else if(this.getSelectInserted())
+				r.moveStart("character", -text.replace(/\r\n/g, "\n").length);
+			r.select();
+		}
+		else
+			ta.value += text;
+	},
+	uriTagFromSel: function(tag, sel) {
+		sel = this.getSel();
+		var u = this.trim(sel);
+		if(!this.isValidURI(u))
+			return false;
+		var desc = prompt(this._localize("Link description (you can leave this field empty):"), "");
+		if(desc == null)
+			return true;
+		this._tag(
+			tag || "url",
+			desc && u,
+			desc || u,
+			/^(\s+)/.test(sel) ? RegExp.$1 : "",
+			/(\s+)$/.test(sel) ? RegExp.$1 : ""
+		);
+		return true;
+	},
+	isValidURI: function(uri) {
+		return this.validURIMask.test(uri);
+	},
+	trim: function(s) {
+		return s.replace(/^\s+|\s+$/g, "");
+	},
+	addClass: function(elt, clss) {
+		if("classList" in elt) {
+			elt.classList.add(clss);
+			return;
+		}
+		this.removeClass(elt, clss);
+		elt.className = (elt.className + " " + clss).replace(/^\s+/, "");
+	},
+	removeClass: function(elt, clss) {
+		if("classList" in elt) {
+			elt.classList.remove(clss);
+			return;
+		}
+		elt.className = elt.className
+			.replace(new RegExp("(^|\\s+)" + clss + "(\\s+|$)"), " ")
+			.replace(/^\s+|\s+$/g, "");
+	},
+	setClass: function(elt, clss, add) {
+		this[add ? "addClass" : "removeClass"](elt, clss);
+	}
+};
+
+function WysiwygEditor(ta, pre) {
 	this.ta = ta;
+	this.ww = this.ta.nextSibling;
+	this.pre = !!pre;
+	this.active = false;
 	this.init();
 }
-Wysiwyg.prototype = {
+WysiwygEditor.prototype = {
 	init: function() {
-		//var ww = this.ww = document.createElement("div");
-		//ww.className = "editor-wysiwyg";
-
-		this.ww = this.ta.nextSibling;
-
+		this.available = this.getAvailable();
 		this.toggle();
-		//ww.contentEditable = "true";
-		//this.ta.parentNode.insertBefore(ww, this.ta.nextSibling);
-		eventListener.add(window, "unload", function destroy() {
-			eventListener.remove(window, "unload", destroy);
-			if(isWysiwyg)
-				this.ta.value = this.getBBCode(); // Fails... =(
+		eventListener.add(window, "unload", function() {
+			eventListener.remove(window, "unload", arguments.callee);
+			if(this.active)
+				this.ta.value = this.getBBCode(); // Fails sometimes ?
+			this.__editor = null;
 		}, this);
 	},
 	toggle: function() {
-		if(!this.available()) {
-			alert("WYSIWYG is not available :(");
-			this.ww.style.display = "none";
+		if(!this.available)
 			return;
-		}
-		var wwMode = this.ta.style.display != "none";
+		//var wwMode = this.ta.style.display != "none";
+		var wwMode = !this.active;
 		var show = wwMode ? this.ww : this.ta;
 		var hide = wwMode ? this.ta : this.ww;
 		show.style.width  = resizer.getStyle(hide, "width");
@@ -44,10 +268,7 @@ Wysiwyg.prototype = {
 		show.style.display = "";
 		hide.style.display = "none";
 		show.focus && show.focus();
-		isWysiwyg = wwMode;
-
-		//~ todo: use options instead of hardcoded ids
-		document.getElementById(wwMode ? "editor-mode-wysisyg" : "editor-mode-plain").checked = true;
+		this.active = wwMode;
 
 		// Hack for Firefox 10 - 13.0a1
 		// With sibling <div> doubleclick in textarea doesn't select word
@@ -56,22 +277,18 @@ Wysiwyg.prototype = {
 		else
 			this.ta.parentNode.removeChild(this.ww);
 	},
-	available: function() {
-		var ok = "execCommand" in document;
-		this.available = function() {
-			return ok;
-		};
-		return ok;
+	getAvailable: function() {
+		return "execCommand" in document;
 	},
 	getFocusedNode: function() {
-		//~ todo: use another way in ond browsers
+		//~ todo: use another way in old browsers
 		if("activeElement" in document)
 			return document.activeElement;
 		if("querySelector" in document)
 			return document.querySelector(":focus");
 		return null;
 	},
-	useTags: function() {
+	_useTags: function() {
 		// Firefox bug (?)
 		// Without this we can get inline styles for <div contenteditable="true">
 		// And styles like <div contenteditable="true" style="... font-weight: bold;">
@@ -84,6 +301,7 @@ Wysiwyg.prototype = {
 		}
 	},
 	insert: function(cmd, arg) {
+		//~ todo: check ww focused! (document.execCommand() in IE8 modify HTML everywhere)
 		switch(cmd) {
 			case "b": cmd = "bold"; break;
 			case "i": cmd = "italic"; break;
@@ -107,9 +325,22 @@ Wysiwyg.prototype = {
 
 			case "pre": cmd = "formatBlock", arg = "<pre>"; break;
 		}
-		this.useTags();
+		this._useTags();
 		document.execCommand(cmd, false, arg || null);
-		this.ww.focus && this.ww.focus();
+
+		this.ww.focus && this.ww.focus(); //~ todo: doesn't works in Opera
+
+		if(!this.__editor.selectInserted) {
+			var sel = window.getSelection && window.getSelection()
+				|| document.getSelection && document.getSelection();
+			if(sel)
+				sel.collapseToEnd();
+			else {
+				var r = document.selection.createRange();
+				r.collapse(false);
+				r.select();
+			}
+		}
 	},
 	insertHTML: function(html) {
 		if(document.selection && document.selection.createRange)
@@ -121,7 +352,7 @@ Wysiwyg.prototype = {
 		document.execCommand("removeFormat", false, null);
 	},
 	getHTML: function() {
-		//~ not implemented
+		//~ not fully implemented
 		if("console" in window && "warn" in console)
 			console.warn("Note: getHTML() not fully implemented");
 		var _this = this;
@@ -190,8 +421,12 @@ Wysiwyg.prototype = {
 	getBBCode: function(node) {
 		if(!node)
 			node = this.ww;
-		else if(node.nodeType == 3 /*Node.TEXT_NODE*/)
-			return this._getNodeText(node);
+		else if(node.nodeType == 3 /*Node.TEXT_NODE*/) {
+			var text = this.getNodeText(node);
+			if(!this.pre)
+				text = text.replace(/[\n\r\t ]+/g, " "); // Note: \s may also remove &nbsp;
+			return text;
+		}
 
 		var ret = "";
 
@@ -257,8 +492,6 @@ Wysiwyg.prototype = {
 			if(isLink) {
 				//tagOpen += "[url=" + node.href + "]";
 				tagOpen += node.href == this.decodeHTML(node.innerHTML) ? "[url]" : "[url=" + node.href + "]";
-				console.log(node.href);
-				console.log(node.innerHTML);
 				tagClose = "[/url]" + tagClose;
 			}
 			if(styles.display == "block")
@@ -460,194 +693,8 @@ Wysiwyg.prototype = {
 			return this.colors[color];
 		return color;
 	},
-	_getNodeText: function(node) {
+	getNodeText: function(node) {
 		return node.textContent || node.innerText || node.nodeValue || "";
-	}
-};
-
-var bbCode = {
-	//== Settings begin
-	language: "ru",
-	selectInserted: false,
-	attrComma: "", // Empty string or '"'
-	validURIMask: /^(\w+:\/+[^\s\/\\'"?&#]+(\/\S*)?|\w+:[^\s\/\\'"?&#]+)$/,
-	onlyTagsMask: /^\[(\w+)([^\[\]]+)?\](\[\/\1\])$/,
-	onlyTagsCloseTagNum: 3, // Number of brackets with ([/tag])
-	getTa: function() {
-		return document.MessageForm && document.MessageForm.Message
-			|| document.getElementsByTagName("textarea")[0];
-	},
-	//== Settings end
-
-	strings: {
-		"Link:": {
-			ru: "Ссылка:"
-		},
-		"Link to image:": {
-			ru: "Ссылка на изображение:"
-		},
-		"Link description (you can leave this field empty):": {
-			ru: "Описание ссылки (можно оставить поле пустым):"
-		},
-		"Quote author (you can leave this field empty):": {
-			ru: "Автор цитаты (можно оставить поле пустым):"
-		}
-	},
-	_localize: function(s) {
-		return this.strings[s] && this.strings[s][this.language] || s;
-	},
-
-	//== API begin
-	insert: function(invertSelect, text) {
-		this.setInvertSelected(invertSelect);
-		this._insert(text);
-	},
-	tag: function(invertSelect, tag, attr, text) {
-		if(isWysiwyg) {
-			wysiwyg.insert(tag, attr);
-			return;
-		}
-		this.setInvertSelected(invertSelect);
-		this._tag(tag, attr, text);
-	},
-	urlTag: function(invertSelect) {
-		if(isWysiwyg) {
-			var u = prompt(this._localize("Link:"), "http://");
-			u && wysiwyg.insert("url", u);
-			return;
-		}
-		this.setInvertSelected(invertSelect);
-		var sel = this.getSel();
-		if(this.uriTagFromSel("url", sel))
-			return;
-		var u = prompt(this._localize("Link:"), "http://");
-		if(u && sel)
-			this._tag("url", u);
-		else if(u != null)
-			this._tag("url", false, u);
-	},
-	imgTag: function(invertSelect) {
-		this.setInvertSelected(invertSelect);
-		if(this.uriTagFromSel("img"))
-			return;
-		var u = prompt(this._localize("Link to image:"), "http://");
-		u && this._tag("img", false, u);
-	},
-	quoteTag: function(invertSelect) {
-		this.setInvertSelected(invertSelect);
-		var author = prompt(this._localize("Quote author (you can leave this field empty):"), "");
-		if(author == null)
-			return;
-		var origComma = this.attrComma;
-		var comma = origComma;
-		if(/\[|\]/.test(author)) {
-			if(author.indexOf("'") != -1)
-				comma = '"';
-			else if(author.indexOf('"') != -1)
-				comma = "'";
-			else if(!comma)
-				comma = '"';
-			this.attrComma = comma;
-		}
-		this._tag("quote", author);
-		this.attrComma = origComma;
-	},
-	//== API end
-
-	_ta: null,
-	_getTa: function() {
-		return this._ta || (
-			this._ta = this.getTa()
-		);
-	},
-	getSel: function() {
-		var ta = this._getTa();
-		if(typeof ta.selectionStart == "number") {
-			return String(
-				window.getSelection && window.getSelection()
-				|| document.getSelection && document.getSelection()
-			) || ta.value.substring(ta.selectionStart, ta.selectionEnd);
-		}
-		return document.selection && document.selection.createRange().text || "";
-	},
-	setInvertSelected: function(e) {
-		if(e === undefined)
-			e = window.event;
-		this.invertSelect = e && typeof e == "object"
-			? e.ctrlKey || e.shiftKey || e.altKey || e.metaKey
-			: e;
-	},
-	getSelectInserted: function(invertSelect) {
-		var si = this.selectInserted;
-		if(this.invertSelect) {
-			this.invertSelect = false;
-			si = !si;
-		}
-		return si;
-	},
-	_tag: function(tag, attr, text, start, end) {
-		this._insert(
-			(start || "")
-			+ "[" + tag + (attr ? "=" + this.attrComma + attr + this.attrComma : "") + "]"
-			+ (text || this.getSel())
-			+ "[/" + tag + "]"
-			+ (end || "")
-		);
-	},
-	_insert: function(text) {
-		var ta = this._getTa();
-		ta.focus();
-		var onlyTagsShift = this.onlyTagsMask.test(text) ? RegExp["$" + this.onlyTagsCloseTagNum].length : 0;
-		if(typeof ta.selectionStart == "number") {
-			var sTop = ta.scrollTop;
-			var sHeight = ta.scrollHeight;
-			var sLeft = ta.scrollLeft;
-			// var sWidth = ta.scrollWidth;
-
-			var ss = ta.selectionStart;
-			var val = ta.value;
-			ta.value = val.substring(0, ss) + text + val.substring(ta.selectionEnd, val.length);
-			var se = ss + text.length - onlyTagsShift;
-			ta.selectionStart = this.getSelectInserted() && !onlyTagsShift ? ss : se;
-			ta.selectionEnd = se;
-
-			ta.scrollTop = sTop + (ta.scrollHeight - sHeight);
-			ta.scrollLeft = sLeft; // + (ta.scrollWidth - sWidth);
-		}
-		else if(document.selection) { // IE
-			var r = document.selection.createRange();
-			r.text = text;
-			if(onlyTagsShift)
-				r.moveEnd("character", -onlyTagsShift);
-			else if(this.getSelectInserted())
-				r.moveStart("character", -text.replace(/\r\n/g, "\n").length);
-			r.select();
-		}
-		else
-			ta.value += text;
-	},
-	uriTagFromSel: function(tag, sel) {
-		sel = this.getSel();
-		var u = this.trim(sel);
-		if(!this.isValidURI(u))
-			return false;
-		var desc = prompt(this._localize("Link description (you can leave this field empty):"), "");
-		if(desc == null)
-			return true;
-		this._tag(
-			tag || "url",
-			desc && u,
-			desc || u,
-			/^(\s+)/.test(sel) ? RegExp.$1 : "",
-			/(\s+)$/.test(sel) ? RegExp.$1 : ""
-		);
-		return true;
-	},
-	isValidURI: function(uri) {
-		return this.validURIMask.test(uri);
-	},
-	trim: function(s) {
-		return s.replace(/^\s+|\s+$/g, "");
 	}
 };
 
@@ -723,11 +770,12 @@ var resizer = {
 	},
 	setResizeCursor: function(rsType) {
 		var root = document.documentElement || document.body;
+		var clss = root.className
+			.replace(/(^|\s+)resize-[\w-]+(\s+|$)/, " ")
+			.replace(/^\s+|\s+$/g, "");
 		root.className = rsType
-			? (root.className + " resize-" + rsType).replace(/^\s+/, "")
-			: root.className
-				.replace(/(^|\s+)resize-[\w-]+(\s+|$)/, " ")
-				.replace(/^\s+|\s+$/g, "");
+			? (clss + " resize-" + rsType).replace(/^\s+/, "")
+			: clss;
 	},
 	stopResize: function(e) {
 		eventListener.remove(document, "mousemove", this.doResize);

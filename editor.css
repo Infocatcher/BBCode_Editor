@@ -5,7 +5,9 @@
 .resizer-container tr, .resizer-container td {
 	margin: 0; padding: 0;
 }
-.jsEnabled .editor-textarea {
+.jsEnabled .editor-textarea,
+.editor-wysiwyg {
+	margin: 0;
 	border-top: 1px solid #c0c0c0;
 	border-right: none;
 	border-bottom: none;
@@ -40,8 +42,13 @@
 .editor-wysiwyg {
 	overflow: auto;
 	resize: both;
-
-	border-left: 1px solid #c0c0c0;
-	border-top: 1px solid #c0c0c0;
 	outline: none !important;
+}
+.editor-wysiwyg p {
+	margin: 0;
+}
+
+.editor-mode-plain .editor-forWysisyg,
+.editor-mode-wysiwyg .editor-forPlain {
+	display: none;
 }

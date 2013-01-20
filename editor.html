@@ -4,21 +4,22 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<meta name="author" content="Infocatcher" />
 	<meta name="copyright" content="&copy; Infocatcher 2009-2012" />
-	<title>BBCode Editor [version 0.4.0a1 - 2012-02-06]</title>
+	<title>BBCode Editor [version 0.4.0a2 - 2012-02-07]</title>
 	<style type="text/css">
 	/*<![CDATA[*/
-		html, body { margin: 0; background: white; }
+		html, body { margin: 0; color: black; background: white; }
 		html { padding: 0; }
-		body { padding: 8px; color: black; font: 1em Verdana,Arial,Helvetica,sans-serif; }
+		body { padding: 8px; }
+		body, textarea { font: 14px Verdana,Arial,Helvetica,sans-serif; }
 
-		#ta { width: 400px; height: 300px; margin: 0; }
+		#ta { width: 400px; height: 300px; }
 		#buttons { margin-top: 4px; }
 
 		.warning { color: #900; }
 
 		.jsDisabled .forJsEnabled,
 		.jsEnabled .forJsDisabled {
-			visibility: hidden;
+			display: none;
 		}
 	/*]]>*/
 	</style>
@@ -31,7 +32,25 @@
 		document.body.className = "jsEnabled";
 	</script>
 	<div>
-		0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789
+		<div id="text">
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam leo justo,
+adipiscing vitae consectetur eu, lacinia nec orci. Etiam id tellus purus, vitae
+interdum leo. In tempor ornare sapien sit amet luctus. Suspendisse mollis risus
+et purus semper lobortis. Vestibulum ante ipsum primis in faucibus orci luctus
+et ultrices posuere cubilia Curae; Vestibulum quis est eu libero venenatis
+tincidunt. Sed sed elit id erat hendrerit mattis.
+			<button onclick='
+				var trg = document.getElementById("ta");
+				var src = document.getElementById("text");
+				if(editor.we.active)
+					trg.nextSibling.innerHTML = src.innerHTML
+						.replace(/<button[\s>][\s\S]*<\/button>/i, "")
+						.replace(/^\s+|\s+$/g, "");
+				else
+					trg.value = (src.textContent || src.innerText)
+						.replace(/^\s+|\s+$/g, "");
+			'>⇓</button>
+		</div>
 		<table class="resizer-container">
 			<tr>
 				<td>
@@ -51,22 +70,22 @@
 			</div>
 		</noscript>
 		<div id="buttons" class="forJsEnabled">
-			<button onclick="bbCode.tag(event, 'b');" accesskey="B">B</button>
-			<button onclick="bbCode.tag(event, 'i');" accesskey="I">I</button>
-			<button onclick="bbCode.tag(event, 'u');" accesskey="N">U</button>
-			<button onclick="bbCode.tag(event, 's');" accesskey="S">S</button>
+			<button onclick="editor.tag(event, 'b');" accesskey="B">B</button>
+			<button onclick="editor.tag(event, 'i');" accesskey="I">I</button>
+			<button onclick="editor.tag(event, 'u');" accesskey="N">U</button>
+			<button onclick="editor.tag(event, 's');" accesskey="S">S</button>
 
-			<button onclick="bbCode.tag(event, 'sub');">Sub</button>
-			<button onclick="bbCode.tag(event, 'sup');">Sup</button>
-			<button onclick="bbCode.tag(event, 'pre');">Pre</button>
+			<button onclick="editor.tag(event, 'sub');">Sub</button>
+			<button onclick="editor.tag(event, 'sup');">Sup</button>
+			<button onclick="editor.tag(event, 'pre');">Pre</button>
 
-			<button onclick="bbCode.urlTag(event);" accesskey="U">URL</button>
-			<button onclick="bbCode.imgTag(event);" accesskey="M">IMG</button>
-			<button onclick="bbCode.quoteTag(event);" accesskey="Q">Quote</button>
-			<button onclick="bbCode.tag(event, 'color', this.nextSibling.value);">Color:
+			<button onclick="editor.urlTag(event);" accesskey="U">URL</button>
+			<button onclick="editor.imgTag(event);" accesskey="M">IMG</button>
+			<button onclick="editor.quoteTag(event);" accesskey="Q">Quote</button>
+			<button onclick="editor.tag(event, 'color', this.nextSibling.value);">Color:
 			</button><select
 				onmousedown="this.__event = event || window.event;"
-				onchange="bbCode.tag(this.__event || event, 'color', this.value); this.style.color = this.value;">
+				onchange="editor.tag(this.__event || event, 'color', this.value); this.style.color = this.value;">
 				<option value="red" selected="selected" style="color: red;">Red</option>
 				<option value="green" style="color: green;">Green</option>
 				<option value="blue" style="color: blue;">Blue</option>
@@ -78,32 +97,38 @@
 				with(document.getElementsByTagName("select")[0])
 					style.color = value;
 			</script>
-			<button onclick="wysiwyg.removeFormatting();">RemoveFormatting</button>
-			<button onclick="alert(isWysiwyg ? wysiwyg.getBBCode() : wysiwyg.getHTML());">GetAlternate</button>
+			<button class="editor-forWysisyg" onclick="editor.we.removeFormatting();">Remove Formatting</button>
+			<button onclick="alert(editor.we.active ? editor.we.getBBCode() : editor.we.getHTML());">Get Alternate</button>
 		</div>
 		<div id="settings" class="forJsEnabled">
-			<span onchange="wysiwyg.toggle();">
 			Editor:
 			<label for="editor-mode-plain">
-				<input name="editor-mode" value="plain" id="editor-mode-plain" type="radio" />
+				<input name="editor-mode" value="plain" id="editor-mode-plain" type="radio"
+					 onclick="editor.toggle(document.getElementById('editor-mode-visual').checked);" />
 				plain
 			</label>
-			<label for="editor-mode-wysisyg">
-				<input name="editor-mode" value="wysisyg" id="editor-mode-wysisyg" type="radio" />
+			<label for="editor-mode-visual">
+				<input name="editor-mode" value="visual" id="editor-mode-visual" type="radio"
+					onclick="editor.toggle(document.getElementById('editor-mode-visual').checked);" />
 				visual
 			</label>
-			</span>
 
 			<label for="selectInserted">
 				<input id="selectInserted" type="checkbox"
-					onclick="bbCode.selectInserted = this.checked; bbCode.getTa().focus();" />
+					onclick="editor.selectInserted = this.checked; editor.focus();" />
 				Select inserted
 			</label>
 		</div>
 	</div>
 	<script type="text/javascript">
-		bbCode.selectInserted = document.getElementById("selectInserted").checked;
-		var wysiwyg = new Wysiwyg(document.getElementsByTagName("textarea")[0]);
+	//<![CDATA[
+		var editor = new Editor("ta", {
+			selectInserted: document.getElementById("selectInserted").checked,
+			onToggle: function(visualMode) {
+				document.getElementById(visualMode ? "editor-mode-visual" : "editor-mode-plain").checked = true;
+			}
+		});
+	//]]>
 	</script>
 </body>
 </html>
