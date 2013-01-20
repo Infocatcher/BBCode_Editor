@@ -1,10 +1,20 @@
 // (c) Infocatcher 2009-2012
-// version 0.4.0a2 - 2012-02-07
+// version 0.4.0a3pre - 2012-02-14
 
 // Dependencies:
 //   eventListener object - eventListener.js
 
+// Usage:
+//	var editor = new Editor("textareaId", {
+//		selectInserted: true,
+//		onToggle: function(visualMode) {
+//			// Show current mode
+//		}
+//	});
+//	editor.tag(event, 'b');
+
 function Editor(ta, options) {
+	this.selectInserted = false;
 	ta = this.ta = this.$(ta);
 	if(options)
 		for(var p in options)
@@ -16,7 +26,6 @@ function Editor(ta, options) {
 Editor.prototype = {
 	//== Settings begin
 	language: "ru",
-	selectInserted: false,
 	attrComma: "", // Empty string or '"'
 	validURIMask: /^(\w+:\/+[^\s\/\\'"?&#]+(\/\S*)?|\w+:[^\s\/\\'"?&#]+)$/,
 	onlyTagsMask: /^\[(\w+)([^\[\]]+)?\](\[\/\1\])$/,
@@ -48,7 +57,7 @@ Editor.prototype = {
 	},
 	tag: function(invertSelect, tag, attr, text) {
 		if(this.we.active) {
-			this.we.insert(tag, attr);
+			this.we.insertTag(tag, attr);
 			return;
 		}
 		this.setInvertSelected(invertSelect);
@@ -57,7 +66,7 @@ Editor.prototype = {
 	urlTag: function(invertSelect) {
 		if(this.we.active) {
 			var u = prompt(this._localize("Link:"), "http://");
-			u && this.we.insert("url", u);
+			u && this.we.insertTag("url", u);
 			return;
 		}
 		this.setInvertSelected(invertSelect);
@@ -83,8 +92,8 @@ Editor.prototype = {
 		if(author == null)
 			return;
 		var origComma = this.attrComma;
-		var comma = origComma;
 		if(/\[|\]/.test(author)) {
+			var comma = origComma;
 			if(author.indexOf("'") != -1)
 				comma = '"';
 			else if(author.indexOf('"') != -1)
@@ -93,7 +102,14 @@ Editor.prototype = {
 				comma = '"';
 			this.attrComma = comma;
 		}
-		this._tag("quote", author);
+		else if(/^".*"$/.test(author))
+			this.attrComma = "'";
+		else if(/^'.*'$/.test(author))
+			this.attrComma = '"';
+		if(this.we.active)
+			this.we.insertRawTag("quote", author);
+		else
+			this._tag("quote", author);
 		this.attrComma = origComma;
 	},
 	toggle: function(visualMode) {
@@ -129,7 +145,8 @@ Editor.prototype = {
 			return String(
 				window.getSelection && window.getSelection()
 				|| document.getSelection && document.getSelection()
-			) || ta.value.substring(ta.selectionStart, ta.selectionEnd);
+			) || ta.style.display != "none" && ta.value.substring(ta.selectionStart, ta.selectionEnd)
+			|| "";
 		}
 		return document.selection && document.selection.createRange().text || "";
 	},
@@ -245,6 +262,11 @@ WysiwygEditor.prototype = {
 	init: function() {
 		this.available = this.getAvailable();
 		this.toggle();
+
+		eventListener.add(window,   "focus",     this.focusHandler, this, true);
+		eventListener.add(document, "mousedown", this.focusHandler, this, true);
+		eventListener.add(document, "click",     this.focusHandler, this, true);
+
 		eventListener.add(window, "unload", function() {
 			eventListener.remove(window, "unload", arguments.callee);
 			if(this.active)
@@ -300,9 +322,12 @@ WysiwygEditor.prototype = {
 		catch(e) {
 		}
 	},
-	insert: function(cmd, arg) {
+	insertTag: function(tag, arg) {
 		//~ todo: check ww focused! (document.execCommand() in IE8 modify HTML everywhere)
-		switch(cmd) {
+		if(!this.editorFocused())
+			return;
+		var cmd;
+		switch(tag) {
 			case "b": cmd = "bold"; break;
 			case "i": cmd = "italic"; break;
 			case "u": cmd = "underline"; break;
@@ -327,9 +352,24 @@ WysiwygEditor.prototype = {
 		}
 		this._useTags();
 		document.execCommand(cmd, false, arg || null);
-
+		this.focus();
+		this.select();
+	},
+	insertRawTag: function(tag, attr, html) {
+		this.insertHTML(
+			this.encodeHTML(
+				"[" + tag
+				+ (attr ? "=" + this.__editor.attrComma + attr + this.__editor.attrComma : "")
+				+ "]"
+			)
+			+ (html || this.getSelectionHTML())
+			+ this.encodeHTML("[/" + tag + "]")
+		);
+	},
+	focus: function() {
 		this.ww.focus && this.ww.focus(); //~ todo: doesn't works in Opera
-
+	},
+	select: function() {
 		if(!this.__editor.selectInserted) {
 			var sel = window.getSelection && window.getSelection()
 				|| document.getSelection && document.getSelection();
@@ -343,20 +383,93 @@ WysiwygEditor.prototype = {
 		}
 	},
 	insertHTML: function(html) {
-		if(document.selection && document.selection.createRange)
-			doc.selection.createRange().pasteHTML(html);
-		else
+		if(!this.editorFocused())
+			return;
+
+		if(this.__editor.selectInserted) {
+			var id = "_selectPoint_" + Math.random().toString().substr(2) + new Date().getTime();
+			html = '<span id="' + id + '">' + html + "</span>";
+		}
+
+		try {
+			if(!document.queryCommandEnabled("insertHTML"))
+				return;
+
 			document.execCommand("insertHTML", false, html);
+			if(this.__editor.selectInserted) {
+				var sel = window.getSelection && window.getSelection()
+					|| document.getSelection && document.getSelection();
+				var r = document.createRange();
+				r.selectNodeContents(document.getElementById(id));
+				sel.removeAllRanges();
+				sel.addRange(r);
+			}
+		}
+		catch(e) {
+			if(document.selection && document.selection.createRange) {
+				var r = document.selection.createRange();
+				r.pasteHTML(html); //~ todo: this doesn't close tags opened before selection
+				if(this.__editor.selectInserted) {
+					r = r.duplicate();
+					r.moveToElementText(document.getElementById(id));
+				}
+				r.select();
+			}
+		}
+		this.focus();
 	},
 	removeFormatting: function() {
+		if(!this.editorFocused())
+			return;
 		document.execCommand("removeFormat", false, null);
 	},
+
+	getSelectionHTML: function() {
+		var sel = window.getSelection && window.getSelection()
+			|| document.getSelection && document.getSelection();
+		if(sel) {
+			var tmp = document.createElement("div");
+			tmp.appendChild(sel.getRangeAt(0).cloneContents());
+			return tmp.innerHTML;
+		}
+		return document.selection && document.selection.createRange().htmlText || "";
+	},
+
+	focusHandler: function(e) {
+		var focused = this.getFocusedNode();
+		if(focused == this.focused)
+			return;
+		this.prevFocused = this.focused;
+		this.focused = focused;
+	},
+	editorFocused: function() {
+		if(/*@cc_on ! @*/ false) // IE
+			return this.focused == this.ww;
+		return this.prevFocused == this.ww || this.focused == this.ww;
+	},
+
 	getHTML: function() {
 		//~ not fully implemented
-		if("console" in window && "warn" in console)
-			console.warn("Note: getHTML() not fully implemented");
+		var bb = this.ta.value.replace(/\r\n?|\n\r?/g, "\n"); // Normalize line breaks
+
+		bb = this.encodeHTML(bb);
+
+		var _extractedCodes = [];
+		var _codeRndSubst;
+		bb = bb.replace(
+			/\[code\]([\s\S]*?(?:\[code\][\s\S]*?\[\/code\][\s\S]*?)*?)\[\/code\]/ig,
+			function(s, code) {
+				_extractedCodes.push(s);
+				if(!_codeRndSubst) // Note: optimized for small codes count!
+					_codeRndSubst = "<<code#" + Math.random().toString().substr(2) + new Date().getTime() + ">>";
+				return _codeRndSubst;
+			}
+		);
+
+		//~ todo: don't parse [code] ... [/code]
 		var _this = this;
-		var bb = this.ta.value
+		bb = bb
+			// Simple tags
 			.replace(/\[b\]/ig, "<strong>")
 			.replace(/\[\/b\]/ig, "</strong>")
 			.replace(/\[i\]/ig, "<em>")
@@ -366,18 +479,72 @@ WysiwygEditor.prototype = {
 			.replace(/\[s\]/ig, "<del>")
 			.replace(/\[\/s\]/ig, "</del>")
 
-			.replace(/\[pre\]/ig, "<pre>")
-			.replace(/\[\/pre\](?:\r\n?|\n\r?)?/ig, "</pre>")
+			.replace(/\[left\]/ig, '<div align="left">')
+			.replace(/\[\/left\]/ig, "</div>")
+			.replace(/\[center\]/ig, '<div align="center">')
+			.replace(/\[\/center\]/ig, "</div>")
+			.replace(/\[right\]/ig, '<div align="right">')
+			.replace(/\[\/right\]/ig, "</div>")
 
 			.replace(/\[sub\]/ig, "<sub>")
 			.replace(/\[\/sub\]/ig, "</sub>")
 			.replace(/\[sup\]/ig, "<sup>")
 			.replace(/\[\/sup\]/ig, "</sup>")
 
+			.replace(/\[spoiler\]/ig, '<span class="bb-spoiler-inline" style="color: black; background: black;">')
+			.replace(/\[\/spoiler\]/ig, "</span>")
+
+			//.replace(/\[pre\]/ig, "<pre>")
+			//.replace(/\[\/pre\]/ig, "</pre>")
+
+			// Tags with parameters
+
+			.replace(/\[size=('|")?(.+?)\1\]/ig, function(s, comma, size) {
+				// +1, -1, 3, etc.
+				if(/^(\+|-)?(\d+)$/.test(size)) {
+					if(RegExp.$1)
+						size = RegExp.$1 == "-" ? "smaller" : "larger";
+					else {
+						var n = Number(RegExp.$2);
+						if     (n <= 1) size = "x-small"; // xx-small
+						else if(n == 2) size = "small";
+						else if(n == 3) size = "medium";
+						else if(n == 4) size = "large";
+						else if(n == 5) size = "x-large";
+						else            size = "xx-large";
+					}
+				}
+				// em, %, px, pt
+				else if(/^\d+(?:\.\d+)?(em|%|px|pt)$/.test(size)) {
+					var unit = RegExp.$1;
+					var min, max;
+					if     (unit == "em") { min = 0.5; max = 3;   }
+					else if(unit == "%")  { min = 50;  max = 300; }
+					else if(unit == "px") { min = 9;   max = 33;  }
+					else if(unit == "pt") { min = 7;   max = 25;  }
+					size = Math.max(min, Math.min(max, parseFloat(size))) + unit;
+				}
+				// x-small, large, etc.
+				else if(!/^(?:xx?-small|small|medium|large|xx?-large|smaller|larger)$/.test(size))
+					return s;
+				return '<span style="font-size: ' + size + ';">';
+			})
+			.replace(/\[\/size\]/ig, "</span>")
+
+			.replace(/\[font=('|")?(.+?)\1\]/ig, function(s, comma, font) {
+				var fonts = font.split(",");
+				for(var i = 0, l = fonts.length; i < l; ++i)
+					if(/[^a-z ]/i.test(fonts[i]))
+						return s;
+				return '<span style="font-family: ' + font + ';">';
+			})
+			.replace(/\[\/font\]/ig, "</span>")
+
 			.replace(/\[color=('|")?(#[\da-f]{3}|#[\da-f]{6}|[a-z]{3,})\1\]/ig, function(s, comma, color) {
 				return '<span style="color: ' + color + ';">';
 			})
 			.replace(/\[\/color\]/ig, "</span>")
+
 			.replace(/\[url\](.*?)\[\/url\]/ig, function(s, url) {
 				if(!/^(?:https?|ftps?):\/\//i.test(url) && !/^mailto:/i.test(url))
 					url = "http://" + url;
@@ -398,10 +565,25 @@ WysiwygEditor.prototype = {
 			})
 			//~ todo: smileys
 
-			.replace(/\[hr(\s*\/)?\]/g, "<hr>")
-			.replace(/\[br(\s*\/)?\]/g, "<br>")
-			.replace(/\r\n?|\n\r?/g, "<br>")
+			// Single tags
+			.replace(/\[hr(\s*\/)?\]/g, "<hr/>")
+			.replace(/\[br(\s*\/)?\]/g, "<br/>")
+
+			.replace(/\n/g, "<br/>\n")
+
+			.replace(/\[pre\]([\s\S]+?)\[\/pre\]/ig, function(s, code) {
+				code = code.replace(/<br\/?>\n/, "\n"); // Undo nl2br()
+				return '<pre class="bb-pre">' + code + '</pre>';
+			})
 		;
+
+
+		if(_extractedCodes.length) {
+			bb = bb.replace(new RegExp(_codeRndSubst, "g"), function(s) {
+				return _extractedCodes.shift() || s;
+			});
+		}
+
 		return bb;
 	},
 	encodeHTML: function(s) {

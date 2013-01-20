@@ -4,7 +4,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<meta name="author" content="Infocatcher" />
 	<meta name="copyright" content="&copy; Infocatcher 2009-2012" />
-	<title>BBCode Editor [version 0.4.0a2 - 2012-02-07]</title>
+	<title>BBCode Editor [version 0.4.0a3pre - 2012-02-14]</title>
 	<style type="text/css">
 	/*<![CDATA[*/
 		html, body { margin: 0; color: black; background: white; }
@@ -33,13 +33,7 @@
 	</script>
 	<div>
 		<div id="text">
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam leo justo,
-adipiscing vitae consectetur eu, lacinia nec orci. Etiam id tellus purus, vitae
-interdum leo. In tempor ornare sapien sit amet luctus. Suspendisse mollis risus
-et purus semper lobortis. Vestibulum ante ipsum primis in faucibus orci luctus
-et ultrices posuere cubilia Curae; Vestibulum quis est eu libero venenatis
-tincidunt. Sed sed elit id erat hendrerit mattis.
-			<button onclick='
+			<button class="forJsEnabled" onclick='
 				var trg = document.getElementById("ta");
 				var src = document.getElementById("text");
 				if(editor.we.active)
@@ -50,6 +44,12 @@ tincidunt. Sed sed elit id erat hendrerit mattis.
 					trg.value = (src.textContent || src.innerText)
 						.replace(/^\s+|\s+$/g, "");
 			'>⇓</button>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam leo justo,
+adipiscing vitae consectetur eu, lacinia nec orci. Etiam id tellus purus, vitae
+interdum leo. In tempor ornare sapien sit amet luctus. Suspendisse mollis risus
+et purus semper lobortis. Vestibulum ante ipsum primis in faucibus orci luctus
+et ultrices posuere cubilia Curae; Vestibulum quis est eu libero venenatis
+tincidunt. Sed sed elit id erat hendrerit mattis.
 		</div>
 		<table class="resizer-container">
 			<tr>
