@@ -632,9 +632,9 @@ WysiwygEditor.prototype = {
 		else if(node.nodeType == 3 /*Node.TEXT_NODE*/) {
 			var text = this.getNodeText(node);
 			if(!this.preMode) {
-				text = text
-					.replace(/[\n\r\t ]+/g, " ") // Note: \s may also remove &nbsp;
-					.replace(/^[\t ]+/mg, "");
+				text = text.replace(/[\n\r\t ]+/g, " "); // Note: \s may also remove &nbsp;
+				if(node.previousSibling && node.previousSibling.nodeName.toLowerCase() == "br")
+					text = text.replace(/^[ \t]+/, "");
 			}
 			return text;
 		}
