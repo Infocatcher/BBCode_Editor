@@ -21,13 +21,15 @@ function Editor(ta, options) {
 	if(options)
 		for(var p in options)
 			this[p] = options[p];
+	if(this.language === undefined)
+		this.language = this.detectLanguage();
 	this.we = new WysiwygEditor(ta, this);
 	this.we.__editor = this;
 	this.onWysiwygToggle();
 }
 Editor.prototype = {
 	//== Settings begin
-	language: "ru",
+	language: undefined,
 	attrComma: "", // Empty string or '"'
 	validURIMask: /^(\w+:\/+[^\s\/\\'"?&#]+(\/\S*)?|\w+:[^\s\/\\'"?&#]+)$/,
 	onlyTagsMask: /^\[(\w+)([^\[\]]+)?\](\[\/\1\])$/,
@@ -51,6 +53,15 @@ Editor.prototype = {
 	},
 	_localize: function(s) {
 		return this.strings[s] && this.strings[s][this.language] || s;
+	},
+	detectLanguage: function() {
+		var lng = navigator.language || navigator.browserLanguage || "";
+		if(
+			/^ru/i.test(lng) // browser language
+			|| !lng && /\sянвар[ья]\s/i.test(new Date(0).toLocaleString()) // or russian letters in date
+		)
+			return "ru";
+		return "en";
 	},
 
 	//== API begin
