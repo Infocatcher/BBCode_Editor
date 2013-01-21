@@ -12,6 +12,7 @@
 	border-right: none;
 	border-bottom: none;
 	border-left: 1px solid #c0c0c0;
+	padding: 1px 3px;
 }
 .resizer-right {
 	width: 7px;
