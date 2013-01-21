@@ -469,7 +469,7 @@ WysiwygEditor.prototype = {
 		this.focused = focused;
 	},
 	editorFocused: function() {
-		if(/*@cc_on ! @*/ false) // IE
+		if(/*@cc_on @_jscript_version < 9 || @*/ false) // IE < 9
 			return this.focused == this.ww;
 		return this.prevFocused == this.ww || this.focused == this.ww;
 	},
