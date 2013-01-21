@@ -384,7 +384,9 @@ WysiwygEditor.prototype = {
 			case "sub": cmd = "subscript"; break;
 			case "sup": cmd = "superscript"; break;
 
-			case "pre": cmd = "formatBlock", arg = "<pre>"; break;
+			case "pre":
+				this.toggleBlockTag(tag);
+				return;
 		}
 		this.execCommand(cmd, arg);
 	},
@@ -393,6 +395,36 @@ WysiwygEditor.prototype = {
 		document.execCommand(cmd, false, arg || null);
 		this.focus();
 		this.select();
+	},
+	toggleBlockTag: function(tag) {
+		this.removeTag(function(node) {
+			return node.nodeName.toLowerCase() == tag;
+		}) || this.execCommand("formatBlock", "<" + tag + ">");
+	},
+	removeTag: function(checker) {
+		this.focus();
+		var sel = window.getSelection && window.getSelection()
+			|| document.getSelection && document.getSelection();
+		var rng = sel && sel.getRangeAt(0)
+			|| document.selection && document.selection.createRange();
+		if(!rng)
+			return false;
+		for(
+			var node = rng.commonAncestorContainer || rng.parentElement();
+			node && node != this.ww;
+			node = node.parentNode
+		) {
+			if(checker(node)) {
+				var p = node.parentNode;
+				while(node.hasChildNodes())
+					p.insertBefore(node.firstChild, node);
+				if(this.getStyles(node).display == "block")
+					p.insertBefore(document.createElement("br"), node);
+				p.removeChild(node);
+				return true;
+			}
+		}
+		return false;
 	},
 	insertRawTag: function(tag, attr, html) {
 		this.insertHTML(
