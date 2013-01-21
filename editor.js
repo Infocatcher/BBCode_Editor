@@ -704,6 +704,25 @@ WysiwygEditor.prototype = {
 				tagOpen += "[color=" + this.convertColor(styles.color) + "]";
 				tagClose = "[/color]" + tagClose;
 			}
+			if(isNew("fontSize")) {
+				var bbSize;
+				var size = /(^|\s|;)font-size:\s*([^\s;]+)/i.test(node.style.cssText)
+					? RegExp.$2 // Real value instead of computed px!
+					: styles.fontSize;
+				if     (size == "smaller")  bbSize = "-1";
+				else if(size == "larger")   bbSize = "+1";
+				else if(size == "xx-small") bbSize = "1";
+				else if(size == "x-small")  bbSize = "1";
+				else if(size == "small")    bbSize = "2";
+				else if(size == "medium")   bbSize = "3";
+				else if(size == "large")    bbSize = "4";
+				else if(size == "x-large")  bbSize = "5";
+				else if(size == "xx-large") bbSize = "6";
+				else if(/^\d+(?:\.\d+)?(em|%|px|pt)$/.test(size))
+					bbSize = size;
+				if(bbSize)
+					tagOpen += "[size=" + bbSize + "]", tagClose = "[/size]" + tagClose;
+			}
 			if(isNew("fontFamily"))
 				tagOpen += "[font=" + styles.fontFamily + "]", tagClose = "[/font]" + tagClose;
 			if(isLink) {
