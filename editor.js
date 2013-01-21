@@ -632,6 +632,7 @@ WysiwygEditor.prototype = {
 
 		var tagOpen = "";
 		var tagClose = "";
+		var hasBlockBBTag = false;
 
 		if(node != this.ww) {
 			var nn = node.nodeName.toLowerCase();
@@ -680,7 +681,7 @@ WysiwygEditor.prototype = {
 			)
 				tagOpen += "[s]", tagClose = "[/s]" + tagClose;
 			if(/(^|-)pre(-|$)/.test(styles.whiteSpace) && isNew("whiteSpace"))
-				tagOpen += "[pre]", tagClose = "[/pre]" + tagClose;
+				tagOpen += "[pre]", tagClose = "[/pre]" + tagClose, hasBlockBBTag = true;
 			if(styles.verticalAlign == "sub" && isNew("verticalAlign"))
 				tagOpen += "[sub]", tagClose = "[/sub]" + tagClose;
 			if(styles.verticalAlign == "super" && isNew("verticalAlign"))
@@ -694,7 +695,7 @@ WysiwygEditor.prototype = {
 				tagOpen += node.href == this.decodeHTML(node.innerHTML) ? "[url]" : "[url=" + node.href + "]";
 				tagClose = "[/url]" + tagClose;
 			}
-			if(styles.display == "block")
+			if(!hasBlockBBTag && styles.display == "block")
 				tagClose += "\n";
 			if(nn == "img" && node.src) {
 				//~ todo: smileys
