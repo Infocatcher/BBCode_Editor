@@ -669,11 +669,10 @@ WysiwygEditor.prototype = {
 				if("_dummyLink" in this)
 					var dummyLink = this._dummyLink;
 				else {
-					var dummyLink = document.createElement("a");
+					var dummyLink = this._dummyLink = document.createElement("a");
 					dummyLink.id = "_wysiwygDummyLink";
 					dummyLink.href = "#" + dummyLink.id;
 					this.ww.parentNode.appendChild(dummyLink);
-					this._dummyLink = dummyLink;
 				}
 				var linkStyles = this.getStyles(dummyLink);
 			}
@@ -704,8 +703,21 @@ WysiwygEditor.prototype = {
 				&& (!isLink || !/(^|\s)line-through(\s|$)/i.test(linkStyles.textDecoration))
 			)
 				tagOpen += "[s]", tagClose = "[/s]" + tagClose;
-			if(/(^|-)pre(-|$)/.test(styles.whiteSpace) && isNew("whiteSpace"))
-				tagOpen += "[pre]", tagClose = "[/pre]" + tagClose, hasBlockBBTag = true;
+			if(/(^|-)pre(-|$)/.test(styles.whiteSpace) && isNew("whiteSpace")) {
+				tagOpen += "[pre]", tagClose = "[/pre]" + tagClose;
+				hasBlockBBTag = true;
+				var _isPre = true;
+
+				if("_dummyPre" in this)
+					var dummyPre = this._dummyPre;
+				else {
+					var dummyPre = this._dummyPre = document.createElement("pre");
+					dummyPre.id = "_wysiwygDummyPre";
+					dummyPre.style.margin = dummyPre.style.padding = 0;
+					this.ww.parentNode.appendChild(dummyPre);
+				}
+				var preStyles = this.getStyles(dummyPre);
+			}
 			if(isNew("textAlign")) {
 				// We can get text-align: -moz-right; here!
 				var align = (styles.textAlign || "")
@@ -747,7 +759,7 @@ WysiwygEditor.prototype = {
 				if(bbSize)
 					tagOpen += "[size=" + bbSize + "]", tagClose = "[/size]" + tagClose;
 			}
-			if(isNew("fontFamily"))
+			if(isNew("fontFamily") && (!_isPre || styles.fontFamily != preStyles.fontFamily))
 				tagOpen += "[font=" + styles.fontFamily + "]", tagClose = "[/font]" + tagClose;
 			if(isLink) {
 				//tagOpen += "[url=" + node.href + "]";
