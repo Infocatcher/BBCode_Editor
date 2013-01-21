@@ -19,7 +19,7 @@ function Editor(ta, options) {
 	if(options)
 		for(var p in options)
 			this[p] = options[p];
-	this.we = new WysiwygEditor(ta);
+	this.we = new WysiwygEditor(ta, this);
 	this.we.__editor = this;
 	this.onWysiwygToggle();
 }
@@ -30,6 +30,7 @@ Editor.prototype = {
 	validURIMask: /^(\w+:\/+[^\s\/\\'"?&#]+(\/\S*)?|\w+:[^\s\/\\'"?&#]+)$/,
 	onlyTagsMask: /^\[(\w+)([^\[\]]+)?\](\[\/\1\])$/,
 	onlyTagsCloseTagNum: 3, // Number of brackets with ([/tag])
+	preMode: undefined, // WYSIWYG
 	//== Settings end
 
 	strings: {
@@ -266,18 +267,23 @@ Editor.prototype = {
 	}
 };
 
-function WysiwygEditor(ta, pre) {
+function WysiwygEditor(ta, editor) {
 	this.ta = ta;
+	this.__editor = editor;
 	this.ww = this.ta.nextSibling;
-	this.pre = pre === undefined
-		? /(^|-)pre(-|$)/.test(this.getStyles(this.ww, "whiteSpace"))
-		: !!pre;
 	this.active = false;
 	this.init();
 }
 WysiwygEditor.prototype = {
 	init: function() {
 		this.available = this.getAvailable();
+		if(!this.available)
+			return;
+
+		var preMode = this.__editor.preMode;
+		this.preMode = preMode === undefined
+			? /(^|-)pre(-|$)/.test(this.getStyles(this.ww, "whiteSpace"))
+			: !!preMode;
 		this.toggle();
 
 		eventListener.add(window,   "focus",     this.focusHandler, this, true);
@@ -625,7 +631,7 @@ WysiwygEditor.prototype = {
 			node = this.ww;
 		else if(node.nodeType == 3 /*Node.TEXT_NODE*/) {
 			var text = this.getNodeText(node);
-			if(!this.pre) {
+			if(!this.preMode) {
 				text = text
 					.replace(/[\n\r\t ]+/g, " ") // Note: \s may also remove &nbsp;
 					.replace(/^[\t ]+/mg, "");
