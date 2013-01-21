@@ -625,8 +625,11 @@ WysiwygEditor.prototype = {
 			node = this.ww;
 		else if(node.nodeType == 3 /*Node.TEXT_NODE*/) {
 			var text = this.getNodeText(node);
-			if(!this.pre)
-				text = text.replace(/[\n\r\t ]+/g, " "); // Note: \s may also remove &nbsp;
+			if(!this.pre) {
+				text = text
+					.replace(/[\n\r\t ]+/g, " ") // Note: \s may also remove &nbsp;
+					.replace(/^[\t ]+/mg, "");
+			}
 			return text;
 		}
 
