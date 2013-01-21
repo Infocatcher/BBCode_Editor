@@ -52,3 +52,9 @@
 .editor-mode-wysiwyg .editor-forPlain {
 	display: none;
 }
+
+.bb-spoiler-inline,
+.bb-spoiler-inline * {
+	color: black !important;
+	background: black !important;
+}
