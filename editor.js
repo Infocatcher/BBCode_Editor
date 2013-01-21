@@ -695,8 +695,13 @@ WysiwygEditor.prototype = {
 				tagOpen += "[sub]", tagClose = "[/sub]" + tagClose;
 			if(styles.verticalAlign == "super" && isNew("verticalAlign"))
 				tagOpen += "[sup]", tagClose = "[/sup]" + tagClose;
-			if(styles.color && isNew("color")) {
-				tagOpen += "[color=" + this.convertColor(styles.color) + "]"; //~ todo
+			if(styles.backgroundColor && isNew("backgroundColor") && styles.color == styles.backgroundColor) {
+				//~ todo: compare converted colors?
+				tagOpen += "[spoiler]", tagClose = "[/spoiler]" + tagClose;
+				var _isSpoiler = true;
+			}
+			if(!_isSpoiler && styles.color && isNew("color")) {
+				tagOpen += "[color=" + this.convertColor(styles.color) + "]";
 				tagClose = "[/color]" + tagClose;
 			}
 			if(isLink) {
