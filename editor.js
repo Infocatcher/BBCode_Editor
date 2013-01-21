@@ -682,6 +682,15 @@ WysiwygEditor.prototype = {
 				tagOpen += "[s]", tagClose = "[/s]" + tagClose;
 			if(/(^|-)pre(-|$)/.test(styles.whiteSpace) && isNew("whiteSpace"))
 				tagOpen += "[pre]", tagClose = "[/pre]" + tagClose, hasBlockBBTag = true;
+			if(isNew("textAlign")) {
+				// We can get text-align: -moz-right; here!
+				var align = (styles.textAlign || "")
+					.replace(/^-[^-]+-/, "");
+				if(align == "left" || align == "center" || align == "right") {
+					tagOpen += "[" + align + "]", tagClose = "[/" + align + "]" + tagClose;
+					hasBlockBBTag = true;
+				}
+			}
 			if(styles.verticalAlign == "sub" && isNew("verticalAlign"))
 				tagOpen += "[sub]", tagClose = "[/sub]" + tagClose;
 			if(styles.verticalAlign == "super" && isNew("verticalAlign"))
