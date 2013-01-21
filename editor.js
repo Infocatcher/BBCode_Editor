@@ -704,6 +704,8 @@ WysiwygEditor.prototype = {
 				tagOpen += "[color=" + this.convertColor(styles.color) + "]";
 				tagClose = "[/color]" + tagClose;
 			}
+			if(isNew("fontFamily"))
+				tagOpen += "[font=" + styles.fontFamily + "]", tagClose = "[/font]" + tagClose;
 			if(isLink) {
 				//tagOpen += "[url=" + node.href + "]";
 				tagOpen += node.href == this.decodeHTML(node.innerHTML) ? "[url]" : "[url=" + node.href + "]";
