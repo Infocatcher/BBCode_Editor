@@ -269,7 +269,9 @@ Editor.prototype = {
 function WysiwygEditor(ta, pre) {
 	this.ta = ta;
 	this.ww = this.ta.nextSibling;
-	this.pre = !!pre;
+	this.pre = pre === undefined
+		? /(^|-)pre(-|$)/.test(this.getStyles(this.ww, "whiteSpace"))
+		: !!pre;
 	this.active = false;
 	this.init();
 }
