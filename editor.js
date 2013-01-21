@@ -1,6 +1,8 @@
 // (c) Infocatcher 2009-2012
 // version 0.4.0a3pre - 2012-02-14
 
+// https://github.com/Infocatcher/BBCode_Editor
+
 // Dependencies:
 //   eventListener object - eventListener.js
 
