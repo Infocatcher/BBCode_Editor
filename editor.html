@@ -34,14 +34,13 @@
 	<div>
 		<div id="text">
 			<button class="forJsEnabled" onclick='
-				var trg = document.getElementById("ta");
 				var src = document.getElementById("text");
 				if(editor.we.active)
-					trg.nextSibling.innerHTML = src.innerHTML
+					editor.ww.innerHTML = src.innerHTML
 						.replace(/<button[\s>][\s\S]*<\/button>/i, "")
 						.replace(/^\s+|\s+$/g, "");
 				else
-					trg.value = (src.textContent || src.innerText)
+					editor.ta.value = (src.textContent || src.innerText)
 						.replace(/^\s+|\s+$/g, "");
 			'>⇓</button>
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam leo justo,
