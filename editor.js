@@ -34,6 +34,7 @@ Editor.prototype = {
 	validURIMask: /^(\w+:\/+[^\s\/\\'"?&#]+(\/\S*)?|\w+:[^\s\/\\'"?&#]+)$/,
 	onlyTagsMask: /^\[(\w+)([^\[\]]+)?\](\[\/\1\])$/,
 	onlyTagsCloseTagNum: 3, // Number of brackets with ([/tag])
+	isVisual: true, // Initial mode
 	preMode: undefined, // WYSIWYG
 	//== Settings end
 
@@ -284,20 +285,23 @@ function WysiwygEditor(ta, editor) {
 	this.ta = ta;
 	this.__editor = editor;
 	this.ww = editor.ww = ta.nextSibling;
-	this.active = false;
 	this.init();
 }
 WysiwygEditor.prototype = {
+	active: false,
 	init: function() {
 		this.available = this.getAvailable();
-		if(!this.available)
+		if(!this.available) {
+			this.__editor.isVisual = false;
 			return;
+		}
 
 		var preMode = this.__editor.preMode;
 		this.preMode = preMode === undefined
 			? /(^|-)pre(-|$)/.test(this.getStyles(this.ww, "whiteSpace"))
 			: !!preMode;
-		this.toggle();
+		if(this.__editor.isVisual)
+			this.toggle();
 
 		eventListener.add(window,   "focus",     this.focusHandler, this, true);
 		eventListener.add(document, "mousedown", this.focusHandler, this, true);
@@ -345,7 +349,7 @@ WysiwygEditor.prototype = {
 		show.style.display = "";
 		hide.style.display = "none";
 		show.focus && show.focus();
-		this.active = wwMode;
+		this.active = this.__editor.isVisual = wwMode;
 
 		try { document.execCommand("enableObjectResizing", false, false); }
 		catch(e) {}
