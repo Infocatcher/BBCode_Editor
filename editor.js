@@ -112,7 +112,7 @@ Editor.prototype = {
 			var u = this.trim(this.getSel());
 			if(!this.isValidURI(u))
 				u = prompt(this._localize("Link to image:"), "http://");
-			u && this.we.insertTag("img", u);
+			u && this.we.insertImage(u);
 			return;
 		}
 		if(this.uriTagFromSel("img"))
