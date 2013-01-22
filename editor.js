@@ -631,8 +631,8 @@ WysiwygEditor.prototype = {
 			.replace(/\[img\](\S+?)\[\/img\]/ig, function(s, src) {
 				if(!/^(?:https?|ftps?):\/\//i.test(src))
 					src = "http://" + src;
-				src = _this.encodeHTML(src); //?
-				return '<img src="' + src + '" alt="[img]"></img>';
+				src = _this.encodeHTML(src);
+				return '<img src="' + src + '" alt="' + src + '"></img>';
 			})
 			//~ todo: smileys
 
