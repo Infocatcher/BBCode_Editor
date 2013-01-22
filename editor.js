@@ -359,10 +359,10 @@ WysiwygEditor.prototype = {
 	},
 	compareHTML: function(oldHTML, newHTML) {
 		oldHTML = oldHTML
-			.replace(/<br\s*\/?>/ig, "<br/>")
 			.replace(/<\/?\w+/g, function(s) {
 				return s.toLowerCase();
 			})
+			.replace(/<br\s*\/?>/g, "<br/>")
 			.replace(/<(\/)?b>/g, "<$1strong>")
 			.replace(/<(\/)?i>/g, "<$1em>")
 			.replace(/<(\/)?u>/g, "<$1ins>")
