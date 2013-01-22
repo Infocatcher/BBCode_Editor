@@ -702,9 +702,17 @@ WysiwygEditor.prototype = {
 			.replace(/&quot;/g, '"')
 			.replace(/&amp;/g, "&");
 	},
-	getBBCode: function(node) {
+	_linkStyles: null,
+	_dummyLink: null,
+	_preStyles: null,
+	_dummyPre: null,
+	getBBCode: function(node, _root) {
 		if(!node)
 			node = this.ww;
+		if(!_root) {
+			_root = node;
+			var isFirstCall = true;
+		}
 		else if(node.nodeType == 3 /*Node.TEXT_NODE*/) {
 			var text = this.getNodeText(node);
 			if(!this.preMode) {
@@ -721,7 +729,7 @@ WysiwygEditor.prototype = {
 		var tagClose = "";
 		var hasBlockBBTag = false;
 
-		if(node != this.ww) {
+		if(node != _root) {
 			var nn = node.nodeName.toLowerCase();
 			if(nn == "br")
 				return "\n";
@@ -729,19 +737,17 @@ WysiwygEditor.prototype = {
 			var isLink = nn == "a" && node.href;
 
 			if(isLink) { //~ todo: visited links
-				if("_dummyLink" in this)
-					var dummyLink = this._dummyLink;
-				else {
+				var linkStyles = this._linkStyles;
+				if(!linkStyles) {
 					var dummyLink = this._dummyLink = document.createElement("a");
-					dummyLink.id = "_wysiwygDummyLink";
-					dummyLink.href = "#" + dummyLink.id;
-					this.ww.parentNode.appendChild(dummyLink);
+					dummyLink.className = "_wysiwygDummyLink";
+					dummyLink.href = "#_wysiwygDummyLink";
+					_root.parentNode.appendChild(dummyLink);
+					linkStyles = this._linkStyles = this.getStyles(dummyLink);
 				}
-				var linkStyles = this.getStyles(dummyLink);
 			}
 
 			var styles = this.getStyles(node);
-			//var isFirstLevel = node.parentNode == this.ww;
 			var parentStyles = this.getStyles(node.parentNode);
 
 			var isNew = function(prop) {
@@ -771,15 +777,14 @@ WysiwygEditor.prototype = {
 				hasBlockBBTag = true;
 				var _isPre = true;
 
-				if("_dummyPre" in this)
-					var dummyPre = this._dummyPre;
-				else {
+				var preStyles = this._preStyles;
+				if(!preStyles) {
 					var dummyPre = this._dummyPre = document.createElement("pre");
-					dummyPre.id = "_wysiwygDummyPre";
+					dummyPre.className = "_wysiwygDummyPre";
 					dummyPre.style.margin = dummyPre.style.padding = 0;
-					this.ww.parentNode.appendChild(dummyPre);
+					_root.parentNode.appendChild(dummyPre);
+					preStyles = this._preStyles = this.getStyles(dummyPre);
 				}
-				var preStyles = this.getStyles(dummyPre);
 			}
 			if(isNew("textAlign")) {
 				// We can get text-align: -moz-right; here!
@@ -844,11 +849,23 @@ WysiwygEditor.prototype = {
 		var childs = node.childNodes;
 		for(var i = 0, l = childs.length; i < l; ++i) {
 			var child = childs[i];
-			ret += this.getBBCode(child);
+			ret += this.getBBCode(child, _root);
 		}
 
 		ret += tagClose;
 
+		if(isFirstCall) {
+			var dl = this._dummyLink;
+			if(dl) {
+				dl.parentNode.removeChild(dl);
+				this._dummyLink = this._linkStyles = null;
+			}
+			var dp = this._dummyPre;
+			if(dp) {
+				dp.parentNode.removeChild(dp);
+				this._dummyPre = this._preStyles = null;
+			}
+		}
 		return ret;
 	},
 	getStyles: function(node) {
