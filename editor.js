@@ -704,6 +704,8 @@ WysiwygEditor.prototype = {
 	},
 	_linkStyles: null,
 	_dummyLink: null,
+	_visitedLinkStyles: null,
+	_dummyVisitedLink: null,
 	_preStyles: null,
 	_dummyPre: null,
 	getBBCode: function(node, _root) {
@@ -736,14 +738,21 @@ WysiwygEditor.prototype = {
 
 			var isLink = nn == "a" && node.href;
 
-			if(isLink) { //~ todo: visited links
+			if(isLink) {
 				var linkStyles = this._linkStyles;
+				var visitedLinkStyles = this._visitedLinkStyles;
 				if(!linkStyles) {
 					var dummyLink = this._dummyLink = document.createElement("a");
 					dummyLink.className = "_wysiwygDummyLink";
 					dummyLink.href = "#_wysiwygDummyLink";
 					_root.parentNode.appendChild(dummyLink);
 					linkStyles = this._linkStyles = this.getStyles(dummyLink);
+
+					var dummyVisitedLink = this._dummyVisitedLink = document.createElement("a");
+					dummyVisitedLink.className = "_wysiwygDummyVisitedLink";
+					dummyVisitedLink.href = "";
+					_root.parentNode.appendChild(dummyVisitedLink);
+					visitedLinkStyles = this._visitedLinkStyles = this.getStyles(dummyVisitedLink);
 				}
 			}
 
@@ -751,25 +760,38 @@ WysiwygEditor.prototype = {
 			var parentStyles = this.getStyles(node.parentNode);
 
 			var isNew = function(prop) {
-				var isNew = styles[prop] != parentStyles[prop];
-				if(isNew && isLink)
-					return styles[prop] != linkStyles[prop];
+				var val = styles[prop];
+				var isNew = val != parentStyles[prop];
+				if(isNew && isLink) {
+					return val != linkStyles[prop]
+						&& val != visitedLinkStyles[prop];
+				}
 				return isNew;
 			};
 			if((styles.fontWeight == "bold" || Number(styles.fontWeight) > 400) && isNew("fontWeight"))
 				tagOpen += "[b]", tagClose = "[/b]" + tagClose;
 			if(styles.fontStyle == "italic" && isNew("fontStyle"))
 				tagOpen += "[i]", tagClose = "[/i]" + tagClose;
+			var underlinePattern = /(^|\s)underline(\s|$)/i;
 			if(
-				/(^|\s)underline(\s|$)/i.test(styles.textDecoration)
-				&& (!parentStyles || !/(^|\s)underline(\s|$)/i.test(parentStyles.textDecoration))
-				&& (!isLink || !/(^|\s)underline(\s|$)/i.test(linkStyles.textDecoration))
+				underlinePattern.test(styles.textDecoration)
+				&& (!parentStyles || !underlinePattern.test(parentStyles.textDecoration))
+				&& (
+					!isLink
+					|| !underlinePattern.test(linkStyles.textDecoration)
+					|| !underlinePattern.test(visitedLinkStyles.textDecoration)
+				)
 			)
 				tagOpen += "[u]", tagClose = "[/u]" + tagClose;
+			var strikePattern = /(^|\s)line-through(\s|$)/i;
 			if(
-				/(^|\s)line-through(\s|$)/i.test(styles.textDecoration)
-				&& (!parentStyles || !/(^|\s)line-through(\s|$)/i.test(parentStyles.textDecoration))
-				&& (!isLink || !/(^|\s)line-through(\s|$)/i.test(linkStyles.textDecoration))
+				strikePattern.test(styles.textDecoration)
+				&& (!parentStyles || !strikePattern.test(parentStyles.textDecoration))
+				&& (
+					!isLink
+					|| !strikePattern.test(linkStyles.textDecoration)
+					|| !strikePattern.test(visitedLinkStyles.textDecoration)
+				)
 			)
 				tagOpen += "[s]", tagClose = "[/s]" + tagClose;
 			if(/(^|-)pre(-|$)/.test(styles.whiteSpace) && isNew("whiteSpace")) {
@@ -857,8 +879,11 @@ WysiwygEditor.prototype = {
 		if(isFirstCall) {
 			var dl = this._dummyLink;
 			if(dl) {
+				var dvl = this._dummyVisitedLink;
 				dl.parentNode.removeChild(dl);
+				dvl.parentNode.removeChild(dvl);
 				this._dummyLink = this._linkStyles = null;
+				this._dummyVisitedLink = this._visitedLinkStyles = null;
 			}
 			var dp = this._dummyPre;
 			if(dp) {
