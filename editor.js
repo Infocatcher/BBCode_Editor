@@ -68,6 +68,10 @@ Editor.prototype = {
 	//== API begin
 	insert: function(invertSelect, text) {
 		this.setInvertSelected(invertSelect);
+		if(this.isVisual) {
+			this.we.insertText(text);
+			return;
+		}
 		this._insert(text);
 	},
 	tag: function(invertSelect, tag, attr, text) {
@@ -535,6 +539,9 @@ WysiwygEditor.prototype = {
 			}
 		}
 		this.focus();
+	},
+	insertText: function(str) {
+		this.insertHTML(this.encodeHTML(str));
 	},
 	removeFormatting: function() {
 		if(!this.editorFocused())
