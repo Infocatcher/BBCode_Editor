@@ -485,6 +485,7 @@ WysiwygEditor.prototype = {
 		return false;
 	},
 	insertRawTag: function(tag, attr, html) {
+		this.focus();
 		this.insertHTML(
 			this.encodeHTML(
 				"[" + tag
@@ -557,6 +558,7 @@ WysiwygEditor.prototype = {
 		this.execCommand("removeFormat");
 	},
 	insertImage: function(src, attrs) {
+		this.focus();
 		if(!attrs)
 			attrs = {};
 		else if(!attrs.hasOwnProperty("alt"))
