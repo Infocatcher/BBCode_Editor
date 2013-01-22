@@ -156,7 +156,7 @@ Editor.prototype = {
 	},
 	focus: function() {
 		if(this.we.active)
-			this.we.ww.focus();
+			this.ww.focus();
 		else
 			this.ta.focus();
 	},
@@ -283,7 +283,7 @@ Editor.prototype = {
 function WysiwygEditor(ta, editor) {
 	this.ta = ta;
 	this.__editor = editor;
-	this.ww = this.ta.nextSibling;
+	this.ww = editor.ww = ta.nextSibling;
 	this.active = false;
 	this.init();
 }
