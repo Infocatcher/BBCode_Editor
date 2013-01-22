@@ -14,6 +14,7 @@
 
 		#ta { width: 400px; height: 300px; }
 		#buttons { margin-top: 4px; }
+		img { border: none; }
 
 		.warning { color: #900; }
 
@@ -100,6 +101,11 @@ tincidunt. Sed sed elit id erat hendrerit mattis.
 			</script>
 			<button class="editor-forWysisyg" onclick="editor.we.removeFormatting();">Remove Formatting</button>
 			<button onclick="alert(editor.we.active ? editor.we.getBBCode() : editor.we.getHTML());">Get Alternate</button>
+		</div>
+		<div id="smileys">
+			Smileys:
+			<a href="javascript:void 0;" onclick="editor.smile(event, ':)', this.firstChild.src); return false;"><img src="smileys/smile.png" alt=":)" title=":)" /></a>
+			<a href="javascript:void 0;" onclick="editor.smile(event, '8)', this.firstChild.src); return false;"><img src="smileys/cool.png" alt="8)" title="8)" /></a>
 		</div>
 		<div id="settings" class="forJsEnabled">
 			<label for="editor-isVisual">
