@@ -702,12 +702,13 @@ WysiwygEditor.prototype = {
 
 		var smileys = this.__editor.smileys;
 		for(var src in smileys) if(smileys.hasOwnProperty(src)) {
-			var hsrc = this.encodeHTML(src);
+			var hSrc = this.encodeHTML(src);
 			var vars = smileys[src];
 			for(var i = 0, l = vars.length; i < l; ++i) {
 				var str = vars[i];
+				var hStr = this.encodeHTML(str);
 				var pattern = new RegExp(this.escapeRegExp(str) + "(?=[^\">]|$)", "g");
-				var img = '<img src="' + hsrc + '" alt="' + this.encodeHTML(str) + '" class="bb-smile"></img>';
+				var img = '<img src="' + hSrc + '" alt="' + hStr + '" title="' + hStr + '" class="bb-smile"></img>';
 				bb = bb.replace(pattern, function(s, offset, orig) {
 					if(
 						offset
