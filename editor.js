@@ -393,7 +393,6 @@ WysiwygEditor.prototype = {
 		return null;
 	},
 	insertTag: function(tag, arg) {
-		//~ todo: check ww focused! (document.execCommand() in IE8 modify HTML everywhere)
 		if(!this.editorFocused())
 			return;
 		var cmd;
@@ -570,7 +569,6 @@ WysiwygEditor.prototype = {
 			}
 		);
 
-		//~ todo: don't parse [code] ... [/code]
 		var _this = this;
 		bb = bb
 			// Simple tags
