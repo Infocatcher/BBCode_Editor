@@ -71,14 +71,15 @@ Editor.prototype = {
 		this._insert(text);
 	},
 	tag: function(invertSelect, tag, attr, text) {
+		this.setInvertSelected(invertSelect);
 		if(this.isVisual) {
 			this.we.insertTag(tag, attr);
 			return;
 		}
-		this.setInvertSelected(invertSelect);
 		this._tag(tag, attr, text);
 	},
 	urlTag: function(invertSelect) {
+		this.setInvertSelected(invertSelect);
 		var sel = this.getSel();
 		if(this.isVisual) {
 			//~ todo: try detect selected link
@@ -93,7 +94,6 @@ Editor.prototype = {
 			u && this.we.insertTag("url", u);
 			return;
 		}
-		this.setInvertSelected(invertSelect);
 		if(this.uriTagFromSel("url", sel))
 			return;
 		var u = prompt(this._localize("Link:"), "http://");
@@ -103,6 +103,7 @@ Editor.prototype = {
 			this._tag("url", false, u);
 	},
 	imgTag: function(invertSelect) {
+		this.setInvertSelected(invertSelect);
 		if(this.isVisual) {
 			var u = this.trim(this.getSel());
 			if(!this.isValidURI(u))
@@ -110,7 +111,6 @@ Editor.prototype = {
 			u && this.we.insertTag("img", u);
 			return;
 		}
-		this.setInvertSelected(invertSelect);
 		if(this.uriTagFromSel("img"))
 			return;
 		var u = prompt(this._localize("Link to image:"), "http://");
@@ -487,7 +487,7 @@ WysiwygEditor.prototype = {
 		this.ww.focus && this.ww.focus(); //~ todo: doesn't work in Opera
 	},
 	select: function() {
-		if(!this.__editor.selectInserted) {
+		if(!this.__editor.getSelectInserted()) {
 			var sel = window.getSelection && window.getSelection()
 				|| document.getSelection && document.getSelection();
 			if(sel)
@@ -503,7 +503,8 @@ WysiwygEditor.prototype = {
 		if(!this.editorFocused())
 			return;
 
-		if(this.__editor.selectInserted) {
+		var selectInserted = this.__editor.getSelectInserted();
+		if(selectInserted) {
 			var id = "_selectPoint_" + Math.random().toString().substr(2) + new Date().getTime();
 			html = '<span id="' + id + '">' + html + "</span>";
 		}
@@ -513,7 +514,7 @@ WysiwygEditor.prototype = {
 				return;
 
 			document.execCommand("insertHTML", false, html);
-			if(this.__editor.selectInserted) {
+			if(selectInserted) {
 				var sel = window.getSelection && window.getSelection()
 					|| document.getSelection && document.getSelection();
 				var r = document.createRange();
@@ -526,7 +527,7 @@ WysiwygEditor.prototype = {
 			if(document.selection && document.selection.createRange) {
 				var r = document.selection.createRange();
 				r.pasteHTML(html); //~ todo: this doesn't close tags opened before selection
-				if(this.__editor.selectInserted) {
+				if(selectInserted) {
 					r = r.duplicate();
 					r.moveToElementText(document.getElementById(id));
 				}
