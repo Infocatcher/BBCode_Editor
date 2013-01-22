@@ -799,7 +799,6 @@ WysiwygEditor.prototype = {
 
 		var tagOpen = "";
 		var tagClose = "";
-		var hasBlockBBTag = false;
 
 		if(node != _root) {
 			var nn = node.nodeName.toLowerCase();
@@ -808,6 +807,7 @@ WysiwygEditor.prototype = {
 			if(nn == "hr")
 				return "[hr]";
 
+			var hasBlockBBTag = false;
 			var isLink = nn == "a" && node.href;
 
 			if(isLink) {
@@ -889,10 +889,14 @@ WysiwygEditor.prototype = {
 					hasBlockBBTag = true;
 				}
 			}
-			if(styles.verticalAlign == "sub" && isNew("verticalAlign"))
+			if(styles.verticalAlign == "sub" && isNew("verticalAlign")) {
 				tagOpen += "[sub]", tagClose = "[/sub]" + tagClose;
-			if(styles.verticalAlign == "super" && isNew("verticalAlign"))
+				var _ignoreSize = true;
+			}
+			if(styles.verticalAlign == "super" && isNew("verticalAlign")) {
 				tagOpen += "[sup]", tagClose = "[/sup]" + tagClose;
+				var _ignoreSize = true;
+			}
 			if(styles.backgroundColor && isNew("backgroundColor") && styles.color == styles.backgroundColor) {
 				//~ todo: compare converted colors?
 				tagOpen += "[spoiler]", tagClose = "[/spoiler]" + tagClose;
@@ -902,7 +906,7 @@ WysiwygEditor.prototype = {
 				tagOpen += "[color=" + this.convertColor(styles.color) + "]";
 				tagClose = "[/color]" + tagClose;
 			}
-			if(isNew("fontSize")) {
+			if(!_ignoreSize && isNew("fontSize")) {
 				var bbSize;
 				var size = /(^|\s|;)font-size:\s*([^\s;]+)/i.test(node.style.cssText)
 					? RegExp.$2 // Real value instead of computed px!
