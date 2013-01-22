@@ -24,7 +24,6 @@ function Editor(ta, options) {
 	if(this.language === undefined)
 		this.language = this.detectLanguage();
 	this.we = new WysiwygEditor(ta, this);
-	this.we.__editor = this;
 	this.onWysiwygToggle();
 }
 Editor.prototype = {
