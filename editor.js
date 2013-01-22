@@ -120,6 +120,13 @@ Editor.prototype = {
 		var u = prompt(this._localize("Link to image:"), "http://");
 		u && this._tag("img", false, u);
 	},
+	smile: function(invertSelect, alt, src) {
+		this.setInvertSelected(invertSelect);
+		if(this.isVisual)
+			this.we.insertSmile(alt, src);
+		else
+			this._insert(alt);
+	},
 	quoteTag: function(invertSelect) {
 		this.setInvertSelected(invertSelect);
 		var author = prompt(this._localize("Quote author (you can leave this field empty):"), "");
@@ -548,6 +555,23 @@ WysiwygEditor.prototype = {
 		if(!this.editorFocused())
 			return;
 		this.execCommand("removeFormat");
+	},
+	insertImage: function(src, attrs) {
+		if(!attrs)
+			attrs = {};
+		else if(!attrs.hasOwnProperty("alt"))
+			attrs.alt = src;
+		var attrsStr = "";
+		for(var name in attrs) if(attrs.hasOwnProperty(name))
+			attrsStr += " " + name + '="' + this.encodeHTML(attrs[name]) + '"';
+		this.insertHTML('<img src="' + this.encodeHTML(src) + '"' + attrsStr + " />");
+	},
+	insertSmile: function(alt, src) {
+		this.insertImage(src, {
+			alt: alt,
+			title: alt,
+			"class": "bb-smile"
+		});
 	},
 
 	getSelectionHTML: function() {
