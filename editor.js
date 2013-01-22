@@ -735,6 +735,8 @@ WysiwygEditor.prototype = {
 			var nn = node.nodeName.toLowerCase();
 			if(nn == "br")
 				return "\n";
+			if(nn == "hr")
+				return "[hr]";
 
 			var isLink = nn == "a" && node.href;
 
