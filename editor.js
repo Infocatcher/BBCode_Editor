@@ -323,10 +323,6 @@ WysiwygEditor.prototype = {
 			show.innerHTML = this.getHTML();
 		else
 			show.value = this.getBBCode();
-		show.style.display = "";
-		hide.style.display = "none";
-		show.focus && show.focus();
-		this.active = wwMode;
 
 		// Hack for Firefox 10 - 13.0a1
 		// With sibling <div> doubleclick in textarea doesn't select word
@@ -334,6 +330,14 @@ WysiwygEditor.prototype = {
 			this.ta.parentNode.insertBefore(this.ww, this.ta.nextSibling);
 		else
 			this.ta.parentNode.removeChild(this.ww);
+
+		show.style.display = "";
+		hide.style.display = "none";
+		show.focus && show.focus();
+		this.active = wwMode;
+
+		try { document.execCommand("enableObjectResizing", false, false); }
+		catch(e) {}
 	},
 	getAvailable: function() {
 		return "execCommand" in document;
