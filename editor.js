@@ -170,14 +170,14 @@ Editor.prototype = {
 	},
 	getSel: function() {
 		var ta = this.ta;
-		if(typeof ta.selectionStart == "number") {
-			return String(
-				window.getSelection && window.getSelection()
-				|| document.getSelection && document.getSelection()
-			) || ta.style.display != "none" && ta.value.substring(ta.selectionStart, ta.selectionEnd)
-			|| "";
-		}
-		return document.selection && document.selection.createRange().text || "";
+		if(document.selection && document.selection.createRange)
+			return document.selection && document.selection.createRange().text || "";
+		return String(
+			window.getSelection && window.getSelection()
+			|| document.getSelection && document.getSelection()
+		)
+		|| ta.style.display != "none" && ta.value.substring(ta.selectionStart, ta.selectionEnd)
+		|| "";
 	},
 	setInvertSelected: function(e) {
 		if(e === undefined)
