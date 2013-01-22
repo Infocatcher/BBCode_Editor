@@ -35,6 +35,7 @@ Editor.prototype = {
 	onlyTagsCloseTagNum: 3, // Number of brackets with ([/tag])
 	isVisual: true, // Initial mode
 	preMode: undefined, // WYSIWYG
+	smileys: {},
 	//== Settings end
 
 	strings: {
@@ -312,6 +313,19 @@ WysiwygEditor.prototype = {
 				this.ta.value = this.getBBCode(); // Fails sometimes ?
 			this.__editor = null;
 		}, this);
+	},
+	_smileysInitialized: false,
+	initSmileys: function() {
+		if(this._smileysInitialized)
+			return;
+		this._smileysInitialized = true;
+		var sml = this.smileys = {};
+		var smileys = this.__editor.smileys;
+		var resolver = document.createElement("a");
+		for(var src in smileys) if(smileys.hasOwnProperty(src)) {
+			resolver.href = src;
+			sml[resolver.href] = smileys[src];
+		}
 	},
 	toggle: function() {
 		if(!this.available)
@@ -665,7 +679,6 @@ WysiwygEditor.prototype = {
 				src = _this.encodeHTML(src);
 				return '<img src="' + src + '" alt="' + src + '"></img>';
 			})
-			//~ todo: smileys
 
 			// Single tags
 			.replace(/\[hr(\s*\/)?\]/g, "<hr/>")
@@ -676,9 +689,27 @@ WysiwygEditor.prototype = {
 			.replace(/\[pre\]([\s\S]+?)\[\/pre\]/ig, function(s, code) {
 				code = code.replace(/<br\/?>\n/, "\n"); // Undo nl2br()
 				return '<pre class="bb-pre">' + code + '</pre>';
-			})
-		;
+			});
 
+		var smileys = this.__editor.smileys;
+		for(var src in smileys) if(smileys.hasOwnProperty(src)) {
+			var hsrc = this.encodeHTML(src);
+			var vars = smileys[src];
+			for(var i = 0, l = vars.length; i < l; ++i) {
+				var str = vars[i];
+				var pattern = new RegExp(this.escapeRegExp(str) + "(?=[^\">]|$)", "g");
+				var img = '<img src="' + hsrc + '" alt="' + this.encodeHTML(str) + '" class="bb-smile"></img>';
+				bb = bb.replace(pattern, function(s, offset, orig) {
+					if(
+						offset
+						//~ todo: check only for smileys like "8)" ?
+						&& /^\d/.test(orig.charAt(offset - 1)) // Previous char
+					)
+						return s;
+					return img;
+				});
+			}
+		}
 
 		if(_extractedCodes.length) {
 			bb = bb.replace(new RegExp(_codeRndSubst, "g"), function(s) {
@@ -701,6 +732,9 @@ WysiwygEditor.prototype = {
 			.replace(/&gt;/g, ">")
 			.replace(/&quot;/g, '"')
 			.replace(/&amp;/g, "&");
+	},
+	escapeRegExp: function(s) {
+		return s.replace(/[\\\/.^$+*?|()\[\]{}]/g, "\\$&");
 	},
 	_linkStyles: null,
 	_dummyLink: null,
@@ -861,10 +895,14 @@ WysiwygEditor.prototype = {
 			if(!hasBlockBBTag && styles.display == "block")
 				tagClose += "\n";
 			if(nn == "img" && node.src) {
-				//~ todo: smileys
+				var src = node.src;
+				this.initSmileys();
+				var smileys = this.smileys;
+				if(smileys.hasOwnProperty(src))
+					return smileys[src][0];
 				tagOpen += "[img]";
 				tagClose = "[/img]" + tagClose;
-				return tagOpen + node.src + tagClose;
+				return tagOpen + src + tagClose;
 			}
 		}
 
