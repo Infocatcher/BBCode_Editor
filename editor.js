@@ -324,12 +324,17 @@ WysiwygEditor.prototype = {
 		else
 			show.value = this.getBBCode();
 
-		// Hack for Firefox 10 - 13.0a1
-		// With sibling <div> doubleclick in textarea doesn't select word
-		if(wwMode)
-			this.ta.parentNode.insertBefore(this.ww, this.ta.nextSibling);
-		else
-			this.ta.parentNode.removeChild(this.ww);
+		// Hack for Firefox <= 13.0
+		// With sibling <div contenteditable="true"> double click in textarea doesn't select word
+		if(
+			/Firefox\/(\d+\.\d+)/.test(navigator.userAgent)
+			&& RegExp.$1 <= 13
+		) {
+			if(wwMode)
+				this.ta.parentNode.insertBefore(this.ww, this.ta.nextSibling);
+			else
+				this.ta.parentNode.removeChild(this.ww);
+		}
 
 		show.style.display = "";
 		hide.style.display = "none";
