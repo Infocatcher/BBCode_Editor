@@ -71,7 +71,7 @@ Editor.prototype = {
 		this._insert(text);
 	},
 	tag: function(invertSelect, tag, attr, text) {
-		if(this.we.active) {
+		if(this.isVisual) {
 			this.we.insertTag(tag, attr);
 			return;
 		}
@@ -80,7 +80,7 @@ Editor.prototype = {
 	},
 	urlTag: function(invertSelect) {
 		var sel = this.getSel();
-		if(this.we.active) {
+		if(this.isVisual) {
 			//~ todo: try detect selected link
 			//if(this.we.editorFocused()) {
 			//	this.we.focus();
@@ -103,7 +103,7 @@ Editor.prototype = {
 			this._tag("url", false, u);
 	},
 	imgTag: function(invertSelect) {
-		if(this.we.active) {
+		if(this.isVisual) {
 			var u = this.trim(this.getSel());
 			if(!this.isValidURI(u))
 				u = prompt(this._localize("Link to image:"), "http://");
@@ -136,27 +136,27 @@ Editor.prototype = {
 			this.attrComma = "'";
 		else if(/^'.*'$/.test(author))
 			this.attrComma = '"';
-		if(this.we.active)
+		if(this.isVisual)
 			this.we.insertRawTag("quote", author);
 		else
 			this._tag("quote", author);
 		this.attrComma = origComma;
 	},
 	toggle: function(visualMode) {
-		if(visualMode != undefined && visualMode == this.we.active)
+		if(visualMode != undefined && visualMode == this.isVisual)
 			return;
 		this.we.toggle();
 		this.onWysiwygToggle();
 	},
 	onWysiwygToggle: function() {
 		var root = document.documentElement || document.body;
-		this.setClass(root, "editor-mode-plain", !this.we.active);
-		this.setClass(root, "editor-mode-wysiwyg", this.we.active);
+		this.setClass(root, "editor-mode-plain", !this.isVisual);
+		this.setClass(root, "editor-mode-wysiwyg", this.isVisual);
 		if("onToggle" in this)
-			this.onToggle(this.we.active);
+			this.onToggle(this.isVisual);
 	},
 	focus: function() {
-		if(this.we.active)
+		if(this.isVisual)
 			this.ww.focus();
 		else
 			this.ta.focus();
