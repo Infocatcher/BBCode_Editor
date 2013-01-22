@@ -319,10 +319,16 @@ WysiwygEditor.prototype = {
 		var hide = wwMode ? this.ta : this.ww;
 		show.style.width  = resizer.getStyle(hide, "width");
 		show.style.height = resizer.getStyle(hide, "height");
-		if(wwMode)
-			show.innerHTML = this.getHTML();
-		else
-			show.value = this.getBBCode();
+		if(wwMode) {
+			var newHTML = this.getHTML();
+			if(!this.compareHTML(show.innerHTML, newHTML))
+				show.innerHTML = newHTML;
+		}
+		else {
+			var v = this.getBBCode();
+			if(show.value != v)
+				show.value = v;
+		}
 
 		// Hack for Firefox <= 13.0
 		// With sibling <div contenteditable="true"> double click in textarea doesn't select word
@@ -350,6 +356,27 @@ WysiwygEditor.prototype = {
 		//~ todo: "useCSS" for old versions?
 		try { document.execCommand("styleWithCSS", false, false); }
 		catch(e) {}
+	},
+	compareHTML: function(oldHTML, newHTML) {
+		oldHTML = oldHTML
+			.replace(/<br\s*\/?>/ig, "<br/>")
+			.replace(/<\/?\w+/g, function(s) {
+				return s.toLowerCase();
+			})
+			.replace(/<(\/)?b>/g, "<$1strong>")
+			.replace(/<(\/)?i>/g, "<$1em>")
+			.replace(/<(\/)?u>/g, "<$1ins>")
+			.replace(/<(\/)?s(trike)?>/g, "<$1del>");
+		if(!this.preMode) {
+			var removeSpaces = function(s) {
+				return s
+					.replace(/[\n\r\t ]+/g, " ")
+					.replace(/(^|<br\/>)[ \t]+/g, "$1");
+			};
+			oldHTML = removeSpaces(oldHTML);
+			newHTML = removeSpaces(newHTML);
+		}
+		return oldHTML == newHTML;
 	},
 	getAvailable: function() {
 		return "execCommand" in document;
