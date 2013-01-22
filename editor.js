@@ -152,13 +152,6 @@ Editor.prototype = {
 		this.we.toggle();
 		this.onWysiwygToggle();
 	},
-	onWysiwygToggle: function() {
-		var root = document.documentElement || document.body;
-		this.setClass(root, "editor-mode-plain", !this.isVisual);
-		this.setClass(root, "editor-mode-wysiwyg", this.isVisual);
-		if("onToggle" in this)
-			this.onToggle(this.isVisual);
-	},
 	focus: function() {
 		if(this.isVisual)
 			this.ww.focus();
@@ -167,6 +160,14 @@ Editor.prototype = {
 	},
 
 	//== API end
+
+	onWysiwygToggle: function() {
+		var root = document.documentElement || document.body;
+		this.setClass(root, "editor-mode-plain", !this.isVisual);
+		this.setClass(root, "editor-mode-wysiwyg", this.isVisual);
+		if("onToggle" in this)
+			this.onToggle(this.isVisual);
+	},
 
 	$: function(id) {
 		if(typeof id == "string")
