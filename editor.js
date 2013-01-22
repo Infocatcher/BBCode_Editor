@@ -9,7 +9,7 @@
 // Usage:
 //	var editor = new Editor("textareaId", {
 //		selectInserted: true,
-//		onToggle: function(visualMode) {
+//		onToggle: function(isVisual) {
 //			// Show current mode
 //		}
 //	});

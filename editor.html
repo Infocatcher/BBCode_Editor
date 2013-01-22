@@ -102,18 +102,11 @@ tincidunt. Sed sed elit id erat hendrerit mattis.
 			<button onclick="alert(editor.we.active ? editor.we.getBBCode() : editor.we.getHTML());">Get Alternate</button>
 		</div>
 		<div id="settings" class="forJsEnabled">
-			Editor:
-			<label for="editor-mode-plain">
-				<input name="editor-mode" value="plain" id="editor-mode-plain" type="radio"
-					 onclick="editor.toggle(document.getElementById('editor-mode-visual').checked);" />
-				plain
+			<label for="editor-isVisual">
+				<input value="plain" id="editor-isVisual" type="checkbox"
+					 onclick="editor.toggle(this.checked);" />
+				Visual editor
 			</label>
-			<label for="editor-mode-visual">
-				<input name="editor-mode" value="visual" id="editor-mode-visual" type="radio"
-					onclick="editor.toggle(document.getElementById('editor-mode-visual').checked);" />
-				visual
-			</label>
-
 			<label for="selectInserted">
 				<input id="selectInserted" type="checkbox"
 					onclick="editor.selectInserted = this.checked; editor.focus();" />
@@ -126,8 +119,8 @@ tincidunt. Sed sed elit id erat hendrerit mattis.
 		var editor = new Editor("ta", {
 			selectInserted: document.getElementById("selectInserted").checked,
 			//language: "ru",
-			onToggle: function(visualMode) {
-				document.getElementById(visualMode ? "editor-mode-visual" : "editor-mode-plain").checked = true;
+			onToggle: function(isVisual) {
+				document.getElementById("editor-isVisual").checked = isVisual;
 			},
 			smileys: {
 				// "relative/path/to/image.png": [":)", ":-)", ...]
