@@ -847,7 +847,7 @@ WysiwygEditor.prototype = {
 			var underlinePattern = /(^|\s)underline(\s|$)/i;
 			if(
 				underlinePattern.test(styles.textDecoration)
-				&& (!parentStyles || !underlinePattern.test(parentStyles.textDecoration))
+				&& !underlinePattern.test(parentStyles.textDecoration)
 				&& (
 					!isLink
 					|| !underlinePattern.test(linkStyles.textDecoration)
@@ -858,7 +858,7 @@ WysiwygEditor.prototype = {
 			var strikePattern = /(^|\s)line-through(\s|$)/i;
 			if(
 				strikePattern.test(styles.textDecoration)
-				&& (!parentStyles || !strikePattern.test(parentStyles.textDecoration))
+				&& !strikePattern.test(parentStyles.textDecoration)
 				&& (
 					!isLink
 					|| !strikePattern.test(linkStyles.textDecoration)
