@@ -938,8 +938,14 @@ WysiwygEditor.prototype = {
 				var src = node.src;
 				this.initSmileys();
 				var smileys = this.smileys;
-				if(smileys.hasOwnProperty(src))
-					return smileys[src][0];
+				if(smileys.hasOwnProperty(src)) {
+					var alt = node.alt;
+					var vars = smileys[src];
+					for(var i = 0, l = vars.length; i < l; ++i)
+						if(vars[i] == alt)
+							return alt;
+					return vars[0];
+				}
 				tagOpen += "[img]";
 				tagClose = "[/img]" + tagClose;
 				return tagOpen + src + tagClose;
