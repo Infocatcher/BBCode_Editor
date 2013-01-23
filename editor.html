@@ -98,10 +98,10 @@ tincidunt. Sed sed elit id erat hendrerit mattis.
 			<button onclick="editor.tag(event, 'pre');">Pre</button>
 
 			<button onclick="editor.urlTag(event);" accesskey="U">URL</button>
-			<button class="editor-forWysisyg" onclick="editor.we.execCommand('unLink');">-URL</button>
+			<button class="editor-forWysisyg" onclick="editor.we.execCommand('unLink');" accesskey="R">-URL</button>
 			<button onclick="editor.imgTag(event);" accesskey="M">IMG</button>
 			<button onclick="editor.quoteTag(event);" accesskey="Q">Quote</button>
-			<button onclick="editor.tag(event, 'color', this.nextSibling.value);">Color:
+			<button onclick="editor.tag(event, 'color', this.nextSibling.value);" accesskey="C">Color:
 			</button><select
 				onmousedown="this.__event = event || window.event;"
 				onchange="editor.tag(this.__event || event, 'color', this.value); this.style.color = this.value;">
@@ -122,12 +122,12 @@ tincidunt. Sed sed elit id erat hendrerit mattis.
 		<div id="smileys" class="forJsEnabled">Smileys:</div>
 		<div id="settings" class="forJsEnabled">
 			<label for="editor-isVisual">
-				<input value="plain" id="editor-isVisual" type="checkbox"
+				<input value="plain" id="editor-isVisual" type="checkbox" accesskey="E"
 					 onclick="editor.toggle(this.checked);" />
 				Visual editor
 			</label>
 			<label for="selectInserted">
-				<input id="selectInserted" type="checkbox"
+				<input id="selectInserted" type="checkbox" accesskey="S"
 					onclick="editor.selectInserted = this.checked; editor.focus();" />
 				Select inserted
 			</label>
