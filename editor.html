@@ -16,6 +16,15 @@
 		#buttons { margin-top: 4px; }
 		img { border: none; }
 		#smileys img { margin: 1px 2px; vertical-align: middle; }
+		.button-plain {
+			cursor: pointer;
+			margin: 0;
+			padding: 0;
+			min-width: 0;
+			min-height: 0;
+			border: none;
+			background: transparent;
+		}
 
 		.warning { color: #900; }
 
@@ -140,14 +149,14 @@ tincidunt. Sed sed elit id erat hendrerit mattis.
 		var smileysButtons = document.createDocumentFragment();
 		for(var src in smileys) if(smileys.hasOwnProperty(src)) {
 			var alt = smileys[src][0];
-			var a = document.createElement("a");
-			a.href = "javascript:void 0;";
-			a.onclick = insertSmile;
+			var btn = document.createElement("button");
+			btn.className = "button-plain";
+			btn.onclick = insertSmile;
 			var img = document.createElement("img");
 			img.src = src;
 			img.alt = img.title = alt;
-			a.appendChild(img);
-			smileysButtons.appendChild(a);
+			btn.appendChild(img);
+			smileysButtons.appendChild(btn);
 		}
 		document.getElementById("smileys").appendChild(smileysButtons);
 		window.editor = new Editor("ta", {
