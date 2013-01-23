@@ -19,7 +19,7 @@ function Editor(ta, options) {
 	this.selectInserted = false;
 	ta = this.ta = this.$(ta);
 	if(options)
-		for(var p in options)
+		for(var p in options) if(options.hasOwnProperty(p))
 			this[p] = options[p];
 	if(this.language === undefined)
 		this.language = this.detectLanguage();
