@@ -25,6 +25,12 @@
 			border: none;
 			background: transparent;
 		}
+		.fix-mozFocusInner .button-plain::-moz-focus-inner {
+			margin: 0;
+			padding: 0;
+			border: none;
+		}
+		.fix-mozFocusInner .button-plain:focus { outline: 1px dotted; outline-offset: -1px; }
 
 		.warning { color: #900; }
 
@@ -159,6 +165,15 @@ tincidunt. Sed sed elit id erat hendrerit mattis.
 			smileysButtons.appendChild(btn);
 		}
 		document.getElementById("smileys").appendChild(smileysButtons);
+		if(window.getComputedStyle) {
+			var s = window.getComputedStyle(btn, null);
+			var w = s.width;
+			var root = document.documentElement || document.body;
+			var c = root.className;
+			root.className += (c ? " " : "") + "fix-mozFocusInner";
+			if(s.width == w) // Nothing changed, don't override :focus styles
+				root.className = c;
+		}
 		window.editor = new Editor("ta", {
 			selectInserted: document.getElementById("selectInserted").checked,
 			//language: "ru",
