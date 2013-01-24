@@ -100,6 +100,15 @@ Editor.prototype = {
 		else if(u != null)
 			this._tag("url", false, u);
 	},
+	removeUrlTag: function(invertSelect) {
+		if(!this.isVisual || !this.we.editorFocused())
+			return;
+		this.setInvertSelected(invertSelect);
+		var a = !this.getSel() && this.we.getNodeFromSelection("a");
+		a && this.we.selectNodeContents(a);
+		//~ todo: wrong caret position after insert
+		this.we.execCommand("unLink");
+	},
 	imgTag: function(invertSelect) {
 		this.setInvertSelected(invertSelect);
 		if(this.isVisual) {
