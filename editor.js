@@ -482,11 +482,15 @@ WysiwygEditor.prototype = {
 		this.select();
 	},
 	toggleBlockTag: function(tag) {
-		this.removeTag(function(node) {
-			return node.nodeName.toLowerCase() == tag;
-		}) || this.execCommand("formatBlock", "<" + tag + ">");
+		this.removeTag(tag) || this.execCommand("formatBlock", "<" + tag + ">");
 	},
 	getNodeFromSelection: function(checker) {
+		if(typeof checker == "string") {
+			var tag = checker;
+			checker = function(node) {
+				return node.nodeName.toLowerCase() == tag;
+			};
+		}
 		this.focus();
 		var sel = window.getSelection && window.getSelection()
 			|| document.getSelection && document.getSelection();
