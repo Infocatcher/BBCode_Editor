@@ -558,40 +558,44 @@ WysiwygEditor.prototype = {
 			return;
 
 		var selectInserted = this.__editor.getSelectInserted();
-		if(selectInserted) {
-			var id = "_selectPoint_" + Math.random().toString().substr(2) + new Date().getTime();
-			html = '<span id="' + id + '">' + html + "</span>";
-		}
+		var id = "_wysiwygInsPoint_" + new Date().getTime() + "_" + Math.random().toString().substr(2);
+		html = '<span id="' + id + '">' + html + "</span>";
 
 		try {
 			if(!document.queryCommandEnabled("insertHTML"))
 				return;
-
 			document.execCommand("insertHTML", false, html);
-			if(selectInserted) {
-				var sel = window.getSelection && window.getSelection()
-					|| document.getSelection && document.getSelection();
-				var r = document.createRange();
-				r.selectNodeContents(document.getElementById(id));
-				sel.removeAllRanges();
-				sel.addRange(r);
-			}
 		}
 		catch(e) {
 			if(document.selection && document.selection.createRange) {
 				var r = document.selection.createRange();
 				r.pasteHTML(html); //~ todo: this doesn't close tags opened before selection
-				if(selectInserted) {
-					r = r.duplicate();
-					r.moveToElementText(document.getElementById(id));
-				}
-				r.select();
 			}
 		}
+		this.selectNodeContents(document.getElementById(id), !selectInserted);
 		this.focus();
 	},
 	insertText: function(str) {
 		this.insertHTML(this.encodeHTML(str));
+	},
+	selectNodeContents: function(node, collapse) {
+		var sel = window.getSelection && window.getSelection()
+			|| document.getSelection && document.getSelection();
+		if(sel) {
+			var r = document.createRange();
+			r.selectNodeContents(node);
+			if(collapse)
+				r.collapse(false);
+			sel.removeAllRanges();
+			sel.addRange(r);
+			return;
+		}
+		var r = document.selection.createRange();
+		r = r.duplicate();
+		r.moveToElementText(node);
+		if(collapse)
+			r.moveStart("textedit", -1);
+		r.select();
 	},
 	removeFormatting: function() {
 		if(!this.editorFocused())
