@@ -374,6 +374,7 @@ WysiwygEditor.prototype = {
 			sml[resolver.href] = smileys[src];
 		}
 	},
+	_firstToggle: true,
 	toggle: function() {
 		if(!this.available)
 			return;
@@ -415,8 +416,11 @@ WysiwygEditor.prototype = {
 				catch(e) {
 					if(e != "empty")
 						setTimeout(function() { throw e; }, 0);
-					show.innerHTML = newHTML;
+					var fallback = true;
 				}
+				if(this._firstToggle || fallback)
+					show.innerHTML = newHTML;
+				this._firstToggle = false;
 			}
 		}
 		else {
