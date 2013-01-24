@@ -381,7 +381,7 @@ WysiwygEditor.prototype = {
 		if(resolver.href == "test") { // Old IE
 			resolver = new Image(); // All images should be already loaded, so no additional traffic
 			resolve = function(url) {
-				resolver.src = src;
+				resolver.src = url;
 				return resolver.src;
 			};
 		}
