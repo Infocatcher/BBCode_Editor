@@ -371,11 +371,23 @@ WysiwygEditor.prototype = {
 		this._smileysInitialized = true;
 		var sml = this.smileys = {};
 		var smileys = this.__editor.smileys;
+
 		var resolver = document.createElement("a");
-		for(var src in smileys) if(smileys.hasOwnProperty(src)) {
-			resolver.href = src;
-			sml[resolver.href] = smileys[src];
+		function resolve(url) {
+			resolver.href = url;
+			return resolver.href;
 		}
+		resolver.href = "test";
+		if(resolver.href == "test") { // Old IE
+			resolver = new Image(); // All images should be already loaded, so no additional traffic
+			resolve = function(url) {
+				resolver.src = src;
+				return resolver.src;
+			};
+		}
+
+		for(var src in smileys) if(smileys.hasOwnProperty(src))
+			sml[resolve(src)] = smileys[src];
 	},
 	_firstToggle: true,
 	toggle: function() {
