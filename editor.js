@@ -412,7 +412,7 @@ WysiwygEditor.prototype = {
 		return oldHTML == newHTML;
 	},
 	getAvailable: function() {
-		return "execCommand" in document;
+		return "execCommand" in document && this.ww.contentEditable == "true";
 	},
 	getFocusedNode: function(e) {
 		if("activeElement" in document)
