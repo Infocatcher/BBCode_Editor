@@ -7,12 +7,7 @@
 //   eventListener object - eventListener.js
 
 // Usage:
-//	var editor = new Editor("textareaId", {
-//		selectInserted: true,
-//		onToggle: function(isVisual) {
-//			// Show current mode
-//		}
-//	});
+//	var editor = new Editor("textareaId"[, optionsObject]);
 //	editor.tag(event, 'b');
 
 function Editor(ta, options) {
@@ -34,6 +29,7 @@ Editor.prototype = {
 	onlyTagsMask: /^\[(\w+)([^\[\]]+)?\](\[\/\1\])$/,
 	onlyTagsCloseTagNum: 3, // Number of brackets with ([/tag])
 	isVisual: true, // Initial mode
+	onWysiwygNA: function() {},
 	preMode: undefined, // WYSIWYG
 	smileys: {},
 	//== Settings end
@@ -165,15 +161,18 @@ Editor.prototype = {
 		else
 			this.ta.focus();
 	},
-
 	//== API end
 
 	onWysiwygToggle: function() {
 		var root = document.documentElement || document.body;
 		this.setClass(root, "editor-mode-plain", !this.isVisual);
 		this.setClass(root, "editor-mode-wysiwyg", this.isVisual);
-		if("onToggle" in this)
-			this.onToggle(this.isVisual);
+	},
+	_onWysiwygNA: function() {
+		this.onWysiwygToggle();
+		var root = document.documentElement || document.body;
+		this.addClass(root, "editor-noWysiwyg");
+		this.onWysiwygNA();
 	},
 
 	$: function(id) {
@@ -305,6 +304,7 @@ WysiwygEditor.prototype = {
 		this.available = this.getAvailable();
 		if(!this.available) {
 			this.__editor.isVisual = false;
+			this.__editor._onWysiwygNA();
 			return;
 		}
 

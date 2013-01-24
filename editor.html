@@ -32,6 +32,11 @@
 		}
 		.fix-mozFocusInner .button-plain:focus { outline: 1px dotted; outline-offset: -1px; }
 
+		.editor-noWysiwyg #editor-isVisualOption {
+			opacity: 0.6;
+			filter: alpha(opacity=60);
+		}
+
 		.warning { color: #900; }
 
 		.jsDisabled .forJsEnabled,
@@ -121,8 +126,8 @@ tincidunt. Sed sed elit id erat hendrerit mattis.
 		</div>
 		<div id="smileys" class="forJsEnabled">Smileys:</div>
 		<div id="settings" class="forJsEnabled">
-			<label for="editor-isVisual">
-				<input value="plain" id="editor-isVisual" type="checkbox" accesskey="E"
+			<label id="editor-isVisualOption" for="editor-isVisual">
+				<input value="plain" id="editor-isVisual" type="checkbox" checked="checked" accesskey="E"
 					 onclick="editor.toggle(this.checked);" />
 				Visual editor
 			</label>
@@ -175,10 +180,14 @@ tincidunt. Sed sed elit id erat hendrerit mattis.
 				root.className = c;
 		}
 		window.editor = new Editor("ta", {
-			selectInserted: document.getElementById("selectInserted").checked,
 			//language: "ru",
-			onToggle: function(isVisual) {
-				document.getElementById("editor-isVisual").checked = isVisual;
+			selectInserted: document.getElementById("selectInserted").checked,
+			isVisual: document.getElementById("editor-isVisual").checked,
+			onWysiwygNA: function() {
+				var isVisual = document.getElementById("editor-isVisual");
+				isVisual.checked = false;
+				isVisual.parentNode.title = "Your browser doesn't support visual editor";
+				isVisual.disabled = true;
 			},
 			smileys: smileys
 		});
