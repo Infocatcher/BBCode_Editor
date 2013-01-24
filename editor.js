@@ -171,7 +171,7 @@ Editor.prototype = {
 	},
 	focus: function() {
 		if(this.isVisual)
-			this.ww.focus();
+			this.we.focus();
 		else
 			this.ta.focus();
 	},
