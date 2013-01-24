@@ -364,8 +364,9 @@ WysiwygEditor.prototype = {
 		var wwMode = !this.active;
 		var show = wwMode ? this.ww : this.ta;
 		var hide = wwMode ? this.ta : this.ww;
-		show.style.width  = resizer.getStyle(hide, "width");
-		show.style.height = resizer.getStyle(hide, "height");
+		var s = this.getStyles(hide);
+		show.style.width  = s.width;
+		show.style.height = s.height;
 		if(wwMode) {
 			var newHTML = this.getHTML();
 			if(!this.compareHTML(show.innerHTML, newHTML))
