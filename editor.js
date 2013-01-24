@@ -82,15 +82,13 @@ Editor.prototype = {
 		this.setInvertSelected(invertSelect);
 		var sel = this.getSel();
 		if(this.isVisual) {
-			//~ todo: try detect selected link
-			//if(this.we.editorFocused()) {
-			//	this.we.focus();
-			//	var s = window.getSelection().getRangeAt(0).commonAncestorContainer;
-			//	alert(s.parentNode.nodeName);
-			//}
 			var u = this.trim(sel);
-			if(!this.isValidURI(u))
-				u = prompt(this._localize("Link:"), "http://");
+			if(!this.isValidURI(u)) {
+				var a = this.we.getNodeFromSelection("a");
+				u = prompt(this._localize("Link:"), a && a.href || "http://");
+				if(a && u && !sel)
+					this.we.selectNodeContents(a);
+			}
 			u && this.we.insertTag("url", u);
 			return;
 		}
