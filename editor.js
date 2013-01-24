@@ -346,6 +346,9 @@ WysiwygEditor.prototype = {
 		if(this.__editor.isVisual)
 			this.toggle();
 
+		if("onresizestart" in this.ww) // IE
+			this.ww.onresizestart = function() { return false; };
+
 		var fh = this.focusHandler;
 		eventListener.add(window,   "focus",     fh, this, true);
 		eventListener.add(document, "mousedown", fh, this, true);
