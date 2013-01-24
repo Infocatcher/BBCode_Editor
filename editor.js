@@ -21,6 +21,12 @@ function Editor(ta, options) {
 		this.language = this.detectLanguage();
 	this.we = new WysiwygEditor(ta, this);
 	this.onWysiwygToggle();
+
+	ta.__editor = this;
+	eventListener.add(window, "unload", function() {
+		eventListener.remove(window, "unload", arguments.callee);
+		delete ta.__editor;
+	}, this);
 }
 Editor.prototype = {
 	//== Settings begin
@@ -1239,9 +1245,7 @@ var resizer = {
 	addHeight: 120,
 	getArea: function(rsElt) {
 		var ta = rsElt.parentNode.parentNode.getElementsByTagName("textarea")[0];
-		if(ta.style.display != "none")
-			return ta;
-		return ta.nextSibling;
+		return ta.__editor && ta.__editor.inputField || ta;
 	},
 	//== Settings end
 
