@@ -39,6 +39,7 @@ Editor.prototype = {
 	onWysiwygNA: function() {},
 	preMode: undefined, // WYSIWYG
 	smileys: {},
+	root: document.documentElement, // Set to editor parent to use multiple editors
 	//== Settings end
 
 	strings: {
@@ -178,13 +179,13 @@ Editor.prototype = {
 	//== API end
 
 	onWysiwygToggle: function() {
-		var root = document.documentElement || document.body;
+		var root = this.root;
 		this.setClass(root, "editor-mode-plain", !this.isVisual);
 		this.setClass(root, "editor-mode-wysiwyg", this.isVisual);
 	},
 	_onWysiwygNA: function() {
 		this.onWysiwygToggle();
-		var root = document.documentElement || document.body;
+		var root = this.root;
 		this.addClass(root, "editor-noWysiwyg");
 		this.onWysiwygNA();
 	},
