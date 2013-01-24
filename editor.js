@@ -360,23 +360,12 @@ WysiwygEditor.prototype = {
 	toggle: function() {
 		if(!this.available)
 			return;
-		//var wwMode = this.ta.style.display != "none";
 		var wwMode = !this.active;
 		var show = wwMode ? this.ww : this.ta;
 		var hide = wwMode ? this.ta : this.ww;
 		var s = this.getStyles(hide);
 		show.style.width  = s.width;
 		show.style.height = s.height;
-		if(wwMode) {
-			var newHTML = this.getHTML();
-			if(!this.compareHTML(show.innerHTML, newHTML))
-				show.innerHTML = newHTML;
-		}
-		else {
-			var v = this.getBBCode();
-			if(show.value != v)
-				show.value = v;
-		}
 
 		// Hack for Firefox <= 13.0
 		// With sibling <div contenteditable="true"> double click in textarea doesn't select word
@@ -395,6 +384,29 @@ WysiwygEditor.prototype = {
 		show.focus && show.focus();
 		this.active = this.__editor.isVisual = wwMode;
 		this.__editor.inputField = show;
+
+		if(wwMode) {
+			var newHTML = this.getHTML();
+			if(!this.compareHTML(show.innerHTML, newHTML)) {
+				try {
+					this.focus();
+					this.selectNodeContents(show);
+					this.insertHTML(newHTML, false);
+					if(newHTML && !show.innerHTML)
+						throw "empty";
+				}
+				catch(e) {
+					if(e != "empty")
+						setTimeout(function() { throw e; }, 0);
+					show.innerHTML = newHTML;
+				}
+			}
+		}
+		else {
+			var v = this.getBBCode();
+			if(show.value != v)
+				show.value = v;
+		}
 
 		try { document.execCommand("enableObjectResizing", false, false); }
 		catch(e) {}
@@ -569,11 +581,12 @@ WysiwygEditor.prototype = {
 			}
 		}
 	},
-	insertHTML: function(html) {
+	insertHTML: function(html, selectInserted) {
 		if(!this.editorFocused())
 			return;
 
-		var selectInserted = this.__editor.getSelectInserted();
+		if(selectInserted === undefined)
+			selectInserted = this.__editor.getSelectInserted();
 		var id = "_wysiwygInsPoint_" + new Date().getTime() + "_" + Math.random().toString().substr(2);
 		html = '<span id="' + id + '">' + html + "</span>";
 
