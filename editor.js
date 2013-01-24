@@ -895,8 +895,6 @@ WysiwygEditor.prototype = {
 			return text;
 		}
 
-		var ret = "";
-
 		var tagOpen = "";
 		var tagClose = "";
 
@@ -1052,15 +1050,17 @@ WysiwygEditor.prototype = {
 			}
 		}
 
-		ret += tagOpen;
-
+		var internal = "";
 		var childs = node.childNodes;
 		for(var i = 0, l = childs.length; i < l; ++i) {
 			var child = childs[i];
-			ret += this.getBBCode(child, _root);
+			internal += this.getBBCode(child, _root);
 		}
 
-		ret += tagClose;
+		// Buggy empty tags on Opera after insertHTML()
+		// Looks like selectNodeContents() fails sometimes
+		if(!internal && window.opera)
+			return "";
 
 		if(isFirstCall) {
 			var dl = this._dummyLink;
@@ -1077,7 +1077,7 @@ WysiwygEditor.prototype = {
 				this._dummyPre = this._preStyles = null;
 			}
 		}
-		return ret;
+		return tagOpen + internal + tagClose;
 	},
 	getStyles: function(node) {
 		return window.getComputedStyle
