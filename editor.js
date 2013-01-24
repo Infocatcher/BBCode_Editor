@@ -11,7 +11,6 @@
 //	editor.tag(event, 'b');
 
 function Editor(ta, options) {
-	this.selectInserted = false;
 	ta = this.ta = this.inputField = this.$(ta);
 
 	if(options)
@@ -31,6 +30,7 @@ function Editor(ta, options) {
 Editor.prototype = {
 	//== Settings begin
 	language: undefined,
+	selectInserted: false,
 	attrComma: "", // Empty string or '"'
 	validURIMask: /^(\w+:\/+[^\s\/\\'"?&#]+(\/\S*)?|\w+:[^\s\/\\'"?&#]+)$/,
 	onlyTagsMask: /^\[(\w+)([^\[\]]+)?\](\[\/\1\])$/,
