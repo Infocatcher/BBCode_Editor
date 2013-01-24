@@ -233,6 +233,22 @@ Editor.prototype = {
 		var ta = this.ta;
 		ta.focus();
 		var onlyTagsShift = this.onlyTagsMask.test(text) ? RegExp["$" + this.onlyTagsCloseTagNum].length : 0;
+		try { // Google Chrome
+			if(document.queryCommandEnabled("insertText")) {
+				var ss = ta.selectionStart;
+				var se = ss + text.length - onlyTagsShift;
+				var v = ta.value;
+				document.execCommand("insertText", false, text);
+				if(ta.value == v)
+					throw "not changed";
+				ta.selectionStart = this.getSelectInserted() && !onlyTagsShift ? ss : se;
+				ta.selectionEnd = se;
+				return;
+			}
+		}
+		catch(e) {
+		}
+
 		if(typeof ta.selectionStart == "number") {
 			var sTop = ta.scrollTop;
 			var sHeight = ta.scrollHeight;
