@@ -12,7 +12,8 @@
 
 function Editor(ta, options) {
 	this.selectInserted = false;
-	ta = this.ta = this.$(ta);
+	ta = this.ta = this.inputField = this.$(ta);
+
 	if(options)
 		for(var p in options) if(options.hasOwnProperty(p))
 			this[p] = options[p];
@@ -386,6 +387,7 @@ WysiwygEditor.prototype = {
 		hide.style.display = "none";
 		show.focus && show.focus();
 		this.active = this.__editor.isVisual = wwMode;
+		this.__editor.inputField = show;
 
 		try { document.execCommand("enableObjectResizing", false, false); }
 		catch(e) {}
