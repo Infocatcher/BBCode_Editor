@@ -484,6 +484,12 @@ WysiwygEditor.prototype = {
 	toggleBlockTag: function(tag) {
 		this.removeTag(tag) || this.execCommand("formatBlock", "<" + tag + ">");
 	},
+	getRange: function() {
+		var sel = window.getSelection && window.getSelection()
+			|| document.getSelection && document.getSelection();
+		return sel && sel.getRangeAt(0)
+			|| document.selection && document.selection.createRange();
+	},
 	getNodeFromSelection: function(checker) {
 		if(typeof checker == "string") {
 			var tag = checker;
@@ -493,10 +499,7 @@ WysiwygEditor.prototype = {
 		}
 		if(!window.opera)
 			this.focus();
-		var sel = window.getSelection && window.getSelection()
-			|| document.getSelection && document.getSelection();
-		var rng = sel && sel.getRangeAt(0)
-			|| document.selection && document.selection.createRange();
+		var rng = this.getRange();
 		if(!rng)
 			return null;
 		for(
