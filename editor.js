@@ -591,14 +591,19 @@ WysiwygEditor.prototype = {
 	insertRawTag: function(tag, attr, html) {
 		if(!window.opera)
 			this.focus();
+		if(!html)
+			html = this.getSelectionHTML();
+		var onlyTags = !html;
+		var closeTag = this.encodeHTML("[/" + tag + "]");
 		this.insertHTML(
 			this.encodeHTML(
 				"[" + tag
 				+ (attr ? "=" + this.__editor.attrComma + attr + this.__editor.attrComma : "")
 				+ "]"
 			)
-			+ (html || this.getSelectionHTML())
-			+ this.encodeHTML("[/" + tag + "]")
+			+ html + closeTag,
+			onlyTags ? true : undefined, // We should enable selectInserted for old IE versions
+			onlyTags && closeTag.length
 		);
 	},
 	focus: function() {
@@ -617,14 +622,16 @@ WysiwygEditor.prototype = {
 			}
 		}
 	},
-	insertHTML: function(html, selectInserted) {
+	insertHTML: function(html, selectInserted, onlyTagsShift) {
 		if(!this.editorFocused())
 			return;
 
 		if(selectInserted === undefined)
 			selectInserted = this.__editor.getSelectInserted();
 		var id = "_wysiwygInsPoint_" + new Date().getTime() + "_" + Math.random().toString().substr(2);
-		html = '<span id="' + id + '">' + html + "</span>";
+		html = onlyTagsShift
+			? html.slice(0, -onlyTagsShift) + '<span id="' + id + '"></span>' + html.slice(-onlyTagsShift)
+			: '<span id="' + id + '">' + html + "</span>";
 
 		try {
 			if(!document.queryCommandEnabled("insertHTML"))
