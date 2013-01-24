@@ -486,30 +486,35 @@ WysiwygEditor.prototype = {
 			return node.nodeName.toLowerCase() == tag;
 		}) || this.execCommand("formatBlock", "<" + tag + ">");
 	},
-	removeTag: function(checker) {
+	getNodeFromSelection: function(checker) {
 		this.focus();
 		var sel = window.getSelection && window.getSelection()
 			|| document.getSelection && document.getSelection();
 		var rng = sel && sel.getRangeAt(0)
 			|| document.selection && document.selection.createRange();
 		if(!rng)
-			return false;
+			return null;
 		for(
 			var node = rng.commonAncestorContainer || rng.parentElement();
 			node && node != this.ww;
 			node = node.parentNode
 		) {
-			if(checker(node)) {
-				var p = node.parentNode;
-				while(node.hasChildNodes())
-					p.insertBefore(node.firstChild, node);
-				if(this.getStyles(node).display == "block")
-					p.insertBefore(document.createElement("br"), node);
-				p.removeChild(node);
-				return true;
-			}
+			if(checker(node))
+				return node;
 		}
-		return false;
+		return null;
+	},
+	removeTag: function(checker) {
+		var node = this.getNodeFromSelection(checker);
+		if(!node)
+			return false;
+		var p = node.parentNode;
+		while(node.hasChildNodes())
+			p.insertBefore(node.firstChild, node);
+		if(this.getStyles(node).display == "block")
+			p.insertBefore(document.createElement("br"), node);
+		p.removeChild(node);
+		return true;
 	},
 	insertRawTag: function(tag, attr, html) {
 		this.focus();
