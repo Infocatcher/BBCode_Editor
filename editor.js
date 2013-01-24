@@ -315,12 +315,16 @@ WysiwygEditor.prototype = {
 		if(this.__editor.isVisual)
 			this.toggle();
 
-		eventListener.add(window,   "focus",     this.focusHandler, this, true);
-		eventListener.add(document, "mousedown", this.focusHandler, this, true);
-		eventListener.add(document, "click",     this.focusHandler, this, true);
+		var fh = this.focusHandler;
+		eventListener.add(window,   "focus",     fh, this, true);
+		eventListener.add(document, "mousedown", fh, this, true);
+		eventListener.add(document, "click",     fh, this, true);
 
 		eventListener.add(window, "unload", function() {
 			eventListener.remove(window, "unload", arguments.callee);
+			eventListener.remove(window,   "focus",     fh, true);
+			eventListener.remove(document, "mousedown", fh, true);
+			eventListener.remove(document, "click",     fh, true);
 			if(this.active)
 				this.ta.value = this.getBBCode(); // Fails sometimes ?
 			this.__editor = null;
