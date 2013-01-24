@@ -414,12 +414,35 @@ WysiwygEditor.prototype = {
 	getAvailable: function() {
 		return "execCommand" in document;
 	},
-	getFocusedNode: function() {
-		//~ todo: use another way in old browsers
+	getFocusedNode: function(e) {
 		if("activeElement" in document)
 			return document.activeElement;
 		if("querySelector" in document)
 			return document.querySelector(":focus");
+		if(e) {
+			var trg = e.target;
+			if(e.type == "focus")
+				return trg.ownerDocument && trg;
+			for(var node = trg; node; node = node.parentNode) {
+				if(node.contentEditable == "true")
+					return node;
+				switch(node.nodeName.toLowerCase()) {
+					case "a":
+					case "input":
+					case "button":
+					case "select":
+					case "textarea":
+					case "iframe":
+					case "frame":
+					case "body":
+					case "html":
+						return node;
+				}
+			}
+		}
+		setTimeout(function() {
+			throw new Error("Can't get focused node!");
+		}, 0);
 		return null;
 	},
 	insertTag: function(tag, arg) {
@@ -591,11 +614,16 @@ WysiwygEditor.prototype = {
 		return document.selection && document.selection.createRange().htmlText || "";
 	},
 
+	focused: null,
+	prevFocused: null,
 	focusHandler: function(e) {
-		var focused = this.getFocusedNode();
-		if(focused == this.focused)
+		var focused = this.getFocusedNode(e);
+		if(!focused)
 			return;
-		this.prevFocused = this.focused;
+		var prevFocused = this.focused;
+		if(focused == prevFocused)
+			return;
+		this.prevFocused = prevFocused;
 		this.focused = focused;
 	},
 	editorFocused: function() {
