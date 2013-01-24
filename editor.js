@@ -491,7 +491,8 @@ WysiwygEditor.prototype = {
 				return node.nodeName.toLowerCase() == tag;
 			};
 		}
-		this.focus();
+		if(!window.opera)
+			this.focus();
 		var sel = window.getSelection && window.getSelection()
 			|| document.getSelection && document.getSelection();
 		var rng = sel && sel.getRangeAt(0)
@@ -521,7 +522,8 @@ WysiwygEditor.prototype = {
 		return true;
 	},
 	insertRawTag: function(tag, attr, html) {
-		this.focus();
+		if(!window.opera)
+			this.focus();
 		this.insertHTML(
 			this.encodeHTML(
 				"[" + tag
