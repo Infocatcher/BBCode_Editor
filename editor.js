@@ -202,7 +202,7 @@ Editor.prototype = {
 			window.getSelection && window.getSelection()
 			|| document.getSelection && document.getSelection()
 		)
-		|| ta.style.display != "none" && ta.value.substring(ta.selectionStart, ta.selectionEnd)
+		|| !this.isVisual && ta.value.substring(ta.selectionStart, ta.selectionEnd)
 		|| "";
 	},
 	setInvertSelected: function(e) {
