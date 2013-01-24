@@ -422,22 +422,22 @@ WysiwygEditor.prototype = {
 					show.innerHTML = newHTML;
 				this._firstToggle = false;
 			}
+
+			try { document.execCommand("enableObjectResizing", false, false); }
+			catch(e) {}
+			// Firefox bug (?)
+			// Without this we can get inline styles for <div contenteditable="true">
+			// And styles like <div contenteditable="true" style="... font-weight: bold;">
+			// can't be removed using "removeformat" command.
+			//~ todo: "useCSS" for old versions?
+			try { document.execCommand("styleWithCSS", false, false); }
+			catch(e) {}
 		}
 		else {
 			var v = this.getBBCode();
 			if(show.value != v)
 				show.value = v;
 		}
-
-		try { document.execCommand("enableObjectResizing", false, false); }
-		catch(e) {}
-		// Firefox bug (?)
-		// Without this we can get inline styles for <div contenteditable="true">
-		// And styles like <div contenteditable="true" style="... font-weight: bold;">
-		// can't be removed using "removeformat" command.
-		//~ todo: "useCSS" for old versions?
-		try { document.execCommand("styleWithCSS", false, false); }
-		catch(e) {}
 	},
 	compareHTML: function(oldHTML, newHTML) {
 		oldHTML = oldHTML
