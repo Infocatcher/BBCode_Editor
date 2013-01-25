@@ -25,6 +25,8 @@ function Editor(ta, options) {
 	eventListener.add(window, "unload", function() {
 		eventListener.remove(window, "unload", arguments.callee);
 		delete ta.__editor;
+		delete this.we.__editor;
+		delete this.we;
 	}, this);
 }
 Editor.prototype = {
