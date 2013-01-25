@@ -56,22 +56,23 @@
 	<div>
 		<div id="text">
 			<button class="forJsEnabled" onclick='
-				var src = document.getElementById("text");
+				var src = this.nextSibling;
 				if(editor.we.active)
-					editor.ww.innerHTML = src.innerHTML
-						.replace(/<button[\s>][\s\S]*<\/button>/i, "")
-						.replace(/^\s+|\s+$/g, "");
-				else
-					editor.ta.value = (src.textContent || src.innerText)
-						.replace(/^\s+|\s+$/g, "");
-			'>⇓</button>
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam leo justo,
+					editor.ww.innerHTML = src.innerHTML;
+				else {
+					editor.ta.value = src.innerHTML
+						.replace(/\s+/g, " ")
+						.replace(/<br\s*\/?>/ig, "\n")
+						.replace(/^[ \t]/mg, "")
+						.replace(/<[^<>]+>/g, "");
+				}
+			'>⇓</button><span style="margin-left: 0.35em;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam leo justo,
 adipiscing vitae consectetur eu, lacinia nec orci. Etiam id tellus purus, vitae
 interdum leo. In tempor ornare sapien sit amet luctus. Suspendisse mollis risus
-et purus semper lobortis.<br>
+et purus semper lobortis.<br />
 Vestibulum ante ipsum primis in faucibus orci luctus
 et ultrices posuere cubilia Curae; Vestibulum quis est eu libero venenatis
-tincidunt. Sed sed elit id erat hendrerit mattis.
+tincidunt. Sed sed elit id erat hendrerit mattis.</span>
 		</div>
 		<table class="resizer-container">
 			<tr>
