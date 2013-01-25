@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="author" content="Infocatcher" />
+	<meta name="copyright" content="&copy; Infocatcher 2009-2013" />
+	<title>BBCode Editor [version 0.3.5pre - 2013-01-24]</title>
+	<style type="text/css">
+	/*<![CDATA[*/
+		html, body { margin: 0; background: white; }
+		html { padding: 0; }
+		body { padding: 8px; color: black; font: 1em Verdana,Arial,Helvetica,sans-serif; }
+
+		#ta { width: 500px; height: 200px; margin: 0; }
+		#buttons { margin-top: 4px; }
+
+		.warning { color: #900; }
+
+		.jsDisabled .forJsEnabled,
+		.jsEnabled .forJsDisabled {
+			visibility: hidden;
+		}
+	/*]]>*/
+	</style>
+	<script type="text/javascript" src="eventListener.js"></script>
+	<script type="text/javascript" src="editor.js"></script>
+	<link rel="stylesheet" type="text/css" href="editor.css" />
+</head>
+<body class="jsDisabled">
+	<script type="text/javascript">
+		document.body.className = "jsEnabled";
+	</script>
+	<div>
+		0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789
+		<table class="resizer-container">
+			<tr>
+				<td>
+					<textarea id="ta" class="resizer-textarea" cols="60" rows="10"></textarea>
+				</td>
+				<td class="resizer-right forJsEnabled"
+					title="Double click for quick resize"><div class="resizer-right"><!-- dummy div --></div></td>
+			</tr>
+			<tr class="forJsEnabled" title="Double click for quick resize">
+				<td class="resizer-bottom"></td>
+				<td class="resizer-right-bottom"></td>
+			</tr>
+		</table>
+		<noscript>
+			<div class="warning forJsDisabled">
+				Editor doesn't work without JavaScript!
+			</div>
+		</noscript>
+		<div id="buttons" class="forJsEnabled">
+			<button onclick="bbCode.tag(event, 'b');" accesskey="B">B</button>
+			<button onclick="bbCode.tag(event, 'i');" accesskey="I">I</button>
+			<button onclick="bbCode.urlTag(event);" accesskey="U">URL</button>
+			<button onclick="bbCode.imgTag(event);" accesskey="M">IMG</button>
+			<button onclick="bbCode.quoteTag(event);" accesskey="Q">Quote</button>
+			<button onclick="bbCode.tag(event, 'color', this.nextSibling.value);">Color:
+			</button><select
+				onmousedown="this.__event = event || window.event;"
+				onchange="bbCode.tag(this.__event || event, 'color', this.value); this.style.color = this.value;">
+				<option value="red" selected="selected" style="color: red;">Red</option>
+				<option value="green" style="color: green;">Green</option>
+				<option value="blue" style="color: blue;">Blue</option>
+				<option value="black" style="color: black;">Black</option>
+				<option value="gray" style="color: gray;">Gray</option>
+				<option value="silver" style="color: silver;">Silver</option>
+			</select>
+			<script type="text/javascript">
+				with(document.getElementsByTagName("select")[0])
+					style.color = value;
+			</script>
+		</div>
+		<div id="settings" class="forJsEnabled">
+			<label for="selectInserted">
+				<input id="selectInserted" type="checkbox"
+					onclick="bbCode.selectInserted = this.checked; bbCode.getTa().focus();" />
+				Select inserted
+			</label>
+		</div>
+	</div>
+	<script type="text/javascript">
+		bbCode.selectInserted = document.getElementById("selectInserted").checked;
+	</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+.resizer-container {
+	border-collapse: collapse;
+	border: none;
+}
+.resizer-container tr, .resizer-container td {
+	margin: 0; padding: 0;
+}
+.jsEnabled .resizer-textarea {
+	border-top: 1px solid #c0c0c0;
+	border-right: none;
+	border-bottom: none;
+	border-left: 1px solid #c0c0c0;
+}
+.resizer-right {
+	width: 7px;
+	/*min-width: 7px;*/
+	cursor: w-resize;
+	background: #c0c0c0 url("grippie-right.gif") center center no-repeat;
+}
+.resizer-bottom {
+	height: 7px;
+	cursor: n-resize;
+	background: #c0c0c0 url("grippie-bottom.gif") center center no-repeat;
+}
+.resizer-right-bottom {
+	cursor: nw-resize;
+	background: #c0c0c0;
+}
+
+.resize-right, .resize-right * {
+	cursor: w-resize !important;
+}
+.resize-bottom, .resize-bottom * {
+	cursor: n-resize !important;
+}
+.resize-right-bottom, .resize-right-bottom * {
+	cursor: nw-resize !important;
+}

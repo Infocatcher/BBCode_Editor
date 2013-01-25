@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="author" content="Infocatcher" />
+	<meta name="copyright" content="&copy; Infocatcher 2009-2013" />
+	<title>BBCode Editor [version 0.4.0a5 - 2013-01-24]</title>
+	<style type="text/css">
+	/*<![CDATA[*/
+		html, body { margin: 0; color: black; background: white; }
+		html { padding: 0; }
+		body { padding: 8px; }
+		body, textarea { font: 14px Verdana,Arial,Helvetica,sans-serif; }
+
+		#ta { width: 500px; height: 200px; }
+		#buttons { margin-top: 4px; }
+		img { border: none; }
+		#smileys img { margin: 1px 2px; vertical-align: middle; }
+		.button-plain {
+			cursor: pointer;
+			margin: 0;
+			padding: 0;
+			min-width: 0;
+			min-height: 0;
+			border: none;
+			background: transparent;
+		}
+		.fix-mozFocusInner .button-plain::-moz-focus-inner {
+			margin: 0;
+			padding: 0;
+			border: none;
+		}
+		.fix-mozFocusInner .button-plain:focus { outline: 1px dotted; outline-offset: -1px; }
+
+		.editor-noWysiwyg #editor-isVisualOption {
+			opacity: 0.6;
+			filter: alpha(opacity=60);
+		}
+
+		.warning { color: #900; }
+
+		.jsDisabled .forJsEnabled,
+		.jsEnabled .forJsDisabled {
+			display: none;
+		}
+	/*]]>*/
+	</style>
+	<script type="text/javascript" src="eventListener.js"></script>
+	<script type="text/javascript" src="editor.js"></script>
+	<link rel="stylesheet" type="text/css" href="editor.css" />
+</head>
+<body class="jsDisabled">
+	<script type="text/javascript">
+		document.body.className = "jsEnabled";
+	</script>
+	<div>
+		<div id="text">
+			<button class="forJsEnabled" onclick='
+				var src = document.getElementById("text");
+				if(editor.we.active)
+					editor.ww.innerHTML = src.innerHTML
+						.replace(/<button[\s>][\s\S]*<\/button>/i, "")
+						.replace(/^\s+|\s+$/g, "");
+				else
+					editor.ta.value = (src.textContent || src.innerText)
+						.replace(/^\s+|\s+$/g, "");
+			'>⇓</button>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam leo justo,
+adipiscing vitae consectetur eu, lacinia nec orci. Etiam id tellus purus, vitae
+interdum leo. In tempor ornare sapien sit amet luctus. Suspendisse mollis risus
+et purus semper lobortis.<br>
+Vestibulum ante ipsum primis in faucibus orci luctus
+et ultrices posuere cubilia Curae; Vestibulum quis est eu libero venenatis
+tincidunt. Sed sed elit id erat hendrerit mattis.
+		</div>
+		<table class="resizer-container">
+			<tr>
+				<td>
+					<textarea id="ta" class="editor-textarea" cols="60" rows="10"
+					></textarea><div class="editor-wysiwyg" contenteditable="true" style="display: none;"></div>
+				</td>
+				<td class="resizer-right forJsEnabled"
+					title="Double click for quick resize"><div class="resizer-right"><!-- dummy div --></div></td>
+			</tr>
+			<tr class="forJsEnabled" title="Double click for quick resize">
+				<td class="resizer-bottom"></td>
+				<td class="resizer-right-bottom"></td>
+			</tr>
+		</table>
+		<noscript>
+			<div class="warning forJsDisabled">
+				Editor doesn't work without JavaScript!
+			</div>
+		</noscript>
+		<div id="buttons" class="forJsEnabled">
+			<button onclick="editor.tag(event, 'b');" accesskey="B">B</button>
+			<button onclick="editor.tag(event, 'i');" accesskey="I">I</button>
+			<button onclick="editor.tag(event, 'u');" accesskey="N">U</button>
+			<button onclick="editor.tag(event, 's');" accesskey="S">S</button>
+
+			<button onclick="editor.tag(event, 'sub');">Sub</button>
+			<button onclick="editor.tag(event, 'sup');">Sup</button>
+			<button onclick="editor.tag(event, 'pre');">Pre</button>
+
+			<button onclick="editor.urlTag(event);" accesskey="U">URL</button>
+			<button class="editor-forWysisyg" onclick="editor.removeUrlTag(event);" accesskey="R">-URL</button>
+			<button onclick="editor.imgTag(event);" accesskey="M">IMG</button>
+			<button onclick="editor.quoteTag(event);" accesskey="Q">Quote</button>
+			<button onclick="editor.tag(event, 'color', this.nextSibling.value);" accesskey="C">Color:
+			</button><select
+				onmousedown="this.__event = event || window.event;"
+				onchange="editor.tag(this.__event || event, 'color', this.value); this.style.color = this.value;">
+				<option value="red" selected="selected" style="color: red;">Red</option>
+				<option value="green" style="color: green;">Green</option>
+				<option value="blue" style="color: blue;">Blue</option>
+				<option value="black" style="color: black;">Black</option>
+				<option value="gray" style="color: gray;">Gray</option>
+				<option value="silver" style="color: silver;">Silver</option>
+			</select>
+			<script type="text/javascript">
+				with(document.getElementsByTagName("select")[0])
+					style.color = value;
+			</script>
+			<button class="editor-forWysisyg" onclick="editor.we.removeFormatting();">Remove Formatting</button>
+		</div>
+		<div id="smileys" class="forJsEnabled">Smileys:</div>
+		<div id="settings" class="forJsEnabled">
+			<label id="editor-isVisualOption" for="editor-isVisual">
+				<input value="plain" id="editor-isVisual" type="checkbox" checked="checked" accesskey="E"
+					 onclick="editor.toggle(this.checked);" />
+				Visual editor
+			</label>
+			<label for="selectInserted" title="Hold any modifier during click on button to temporary toggle this option">
+				<input id="selectInserted" type="checkbox" accesskey="S"
+					onclick="editor.selectInserted = this.checked; editor.focus();" />
+				Select inserted
+			</label>
+		</div>
+	</div>
+	<script type="text/javascript">
+	//<![CDATA[
+	(function() {
+		var smileys = {
+			// "relative/path/to/image.png": [":)", ":-)", ...]
+			"smileys/smile.png": [":)", ":-)"],
+			"smileys/neutral.png": [":|", ":-|"],
+			"smileys/sad.png": [":(", ":-("],
+			"smileys/big_smile.png": [":D", ":-D"],
+			"smileys/wink.png": [";)", ";-)"],
+			"smileys/hmm.png": [":-/"],
+			"smileys/tongue.png": [":P", ":-P"],
+			"smileys/cool.png": ["8)", "8-)"]
+		};
+		function insertSmile(e) {
+			var img = this.firstChild;
+			editor.smile(e, img.alt, img.src);
+			return false;
+		}
+		var smileysButtons = document.createDocumentFragment();
+		for(var src in smileys) if(smileys.hasOwnProperty(src)) {
+			var alt = smileys[src][0];
+			var btn = document.createElement("button");
+			btn.className = "button-plain";
+			btn.onclick = insertSmile;
+			var img = document.createElement("img");
+			img.src = src;
+			img.alt = btn.title = alt;
+			btn.appendChild(img);
+			smileysButtons.appendChild(btn);
+		}
+		document.getElementById("smileys").appendChild(smileysButtons);
+		if(window.getComputedStyle) {
+			var s = window.getComputedStyle(btn, null);
+			var w = s.width;
+			var root = document.documentElement || document.body;
+			var c = root.className;
+			root.className += (c ? " " : "") + "fix-mozFocusInner";
+			if(s.width == w) // Nothing changed, don't override :focus styles
+				root.className = c;
+		}
+		window.editor = new Editor("ta", {
+			//language: "ru",
+			selectInserted: document.getElementById("selectInserted").checked,
+			isVisual: document.getElementById("editor-isVisual").checked,
+			onWysiwygNA: function() {
+				var isVisual = document.getElementById("editor-isVisual");
+				isVisual.checked = false;
+				isVisual.parentNode.title = "Your browser doesn't support visual editor";
+				isVisual.disabled = true;
+			},
+			smileys: smileys
+		});
+	})();
+	//]]>
+	</script>
+</body>
+</html>
