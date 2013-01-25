@@ -1058,7 +1058,8 @@ WysiwygEditor.prototype = {
 			}
 			if(!_ignoreSize && isNew("fontSize")) {
 				var bbSize;
-				var size = /(^|\s|;)font-size:\s*([^\s;]+)/i.test(node.style.cssText)
+				var own = /(^|\s|;)font-size:\s*([^\s;]+)/i.test(node.style.cssText);
+				var size = own
 					? RegExp.$2 // Real value instead of computed px!
 					: styles.fontSize;
 				if     (size == "smaller")  bbSize = "-1";
@@ -1070,6 +1071,15 @@ WysiwygEditor.prototype = {
 				else if(size == "large")    bbSize = "4";
 				else if(size == "x-large")  bbSize = "5";
 				else if(size == "xx-large") bbSize = "6";
+				else if(!own && /^\d+(?:\.\d+)?px$/.test(size)) { // Looks like <H1>..<H6>
+					var px = parseFloat(size);
+					if     (px <= 10) bbSize = "1"; // 10px
+					else if(px <= 14) bbSize = "2"; // 13px
+					else if(px <= 16) bbSize = "3"; // 15px
+					else if(px <= 20) bbSize = "4"; // 18px
+					else if(px <= 26) bbSize = "5"; // 23px
+					else              bbSize = "6"; // 30px
+				}
 				else if(/^\d+(?:\.\d+)?(em|%|px|pt)$/.test(size))
 					bbSize = size;
 				if(bbSize)
