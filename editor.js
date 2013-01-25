@@ -416,15 +416,14 @@ WysiwygEditor.prototype = {
 
 		show.style.display = "";
 		hide.style.display = "none";
-		show.focus && show.focus();
 		this.active = this.__editor.isVisual = wwMode;
 		this.__editor.inputField = show;
 
 		if(wwMode) {
+			this.focus();
 			var newHTML = this.getHTML();
 			if(!this.compareHTML(show.innerHTML, newHTML)) {
 				try {
-					this.focus();
 					this.selectNodeContents(show);
 					this.insertHTML(newHTML, false);
 					if(newHTML && !show.innerHTML)
@@ -451,6 +450,7 @@ WysiwygEditor.prototype = {
 			catch(e) {}
 		}
 		else {
+			this.ta.focus();
 			var v = this.getBBCode();
 			if(show.value != v)
 				show.value = v;
