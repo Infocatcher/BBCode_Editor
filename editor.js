@@ -936,6 +936,8 @@ WysiwygEditor.prototype = {
 			}
 			return text;
 		}
+		else if(node.nodeType == 8 /*Node.COMMENT_NODE*/)
+			return "";
 
 		var tagOpen = "";
 		var tagClose = "";
@@ -946,6 +948,8 @@ WysiwygEditor.prototype = {
 				return "\n";
 			if(nn == "hr")
 				return "[hr]";
+			if(nn == "script" || nn == "style")
+				return "";
 
 			var hasBlockBBTag = false;
 			var isLink = nn == "a" && node.href;
