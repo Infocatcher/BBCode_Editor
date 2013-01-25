@@ -951,6 +951,15 @@ WysiwygEditor.prototype = {
 			if(nn == "script" || nn == "style")
 				return "";
 
+			var styles = this.getStyles(node);
+			if(
+				styles.display == "none"
+				|| styles.visibility == "collapse"
+				|| styles.visibility == "hidden"
+			)
+				return "";
+			var parentStyles = this.getStyles(node.parentNode);
+
 			var hasBlockBBTag = false;
 			var isLink = nn == "a" && node.href;
 
@@ -971,9 +980,6 @@ WysiwygEditor.prototype = {
 					visitedLinkStyles = this._visitedLinkStyles = this.getStyles(dummyVisitedLink);
 				}
 			}
-
-			var styles = this.getStyles(node);
-			var parentStyles = this.getStyles(node.parentNode);
 
 			var isNew = function(prop) {
 				var val = styles[prop];
