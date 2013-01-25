@@ -792,7 +792,7 @@ WysiwygEditor.prototype = {
 
 			// Tags with parameters
 
-			.replace(/\[size=('|")?(.+?)\1\]/ig, function(s, comma, size) {
+			.replace(/\[size=('|"|&quot;)?(.+?)\1\]/ig, function(s, comma, size) {
 				// +1, -1, 3, etc.
 				if(/^(\+|-)?(\d+)$/.test(size)) {
 					if(RegExp.$1)
@@ -824,7 +824,7 @@ WysiwygEditor.prototype = {
 			})
 			.replace(/\[\/size\]/ig, "</span>")
 
-			.replace(/\[font=('|")?(.+?)\1\]/ig, function(s, comma, font) {
+			.replace(/\[font=('|"|&quot;)?(.+?)\1\]/ig, function(s, comma, font) {
 				var fonts = font.split(",");
 				for(var i = 0, l = fonts.length; i < l; ++i)
 					if(/[^a-z ]/i.test(fonts[i]))
@@ -833,7 +833,7 @@ WysiwygEditor.prototype = {
 			})
 			.replace(/\[\/font\]/ig, "</span>")
 
-			.replace(/\[color=('|")?(#[\da-f]{3}|#[\da-f]{6}|[a-z]{3,})\1\]/ig, function(s, comma, color) {
+			.replace(/\[color=('|"|&quot;)?(#[\da-f]{3}|#[\da-f]{6}|[a-z]{3,})\1\]/ig, function(s, comma, color) {
 				return '<span style="color: ' + color + ';">';
 			})
 			.replace(/\[\/color\]/ig, "</span>")
