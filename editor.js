@@ -32,15 +32,15 @@ function Editor(ta, options) {
 Editor.prototype = {
 	//== Settings begin
 	language: undefined,
+	isVisual: true, // Initial mode
 	selectInserted: false,
+	smileys: {},
 	attrComma: "", // Empty string or '"'
 	validURIMask: /^(\w+:\/+[^\s\/\\'"?&#]+(\/\S*)?|\w+:[^\s\/\\'"?&#]+)$/,
 	onlyTagsMask: /^\[(\w+)([^\[\]]+)?\](\[\/\1\])$/,
 	onlyTagsCloseTagNum: 3, // Number of brackets with ([/tag])
-	isVisual: true, // Initial mode
 	onWysiwygNA: function() {},
 	preMode: undefined, // WYSIWYG
-	smileys: {},
 	root: document.documentElement, // Set to editor parent to use multiple editors
 	//== Settings end
 
