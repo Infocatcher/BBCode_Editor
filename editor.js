@@ -563,8 +563,7 @@ WysiwygEditor.prototype = {
 				return node.nodeName.toLowerCase() == tag;
 			};
 		}
-		if(!window.opera)
-			this.focus();
+		this.focus();
 		var rng = this.getRange();
 		if(!rng)
 			return null;
@@ -591,8 +590,7 @@ WysiwygEditor.prototype = {
 		return true;
 	},
 	insertRawTag: function(tag, attr, html) {
-		if(!window.opera)
-			this.focus();
+		this.focus();
 		if(!html)
 			html = this.getSelectionHTML();
 		var onlyTags = !html;
@@ -609,7 +607,27 @@ WysiwygEditor.prototype = {
 		);
 	},
 	focus: function() {
-		this.ww.focus && this.ww.focus(); //~ todo: doesn't work in Opera
+		var ww = this.ww;
+		if(!ww.focus)
+			return;
+		if(!window.opera || this._firstToggle) {
+			ww.focus();
+			return;
+		}
+		try { // Try restore selection in Opera
+			var sel = window.getSelection();
+			var rng = sel.getRangeAt(0);
+			ww.focus();
+			for(var p = rng.commonAncestorContainer; p; p = p.parentNode) {
+				if(p == ww) {
+					sel.addRange(rng);
+					break;
+				}
+			}
+		}
+		catch(e) {
+			setTimeout(function() { throw e; }, 0);
+		}
 	},
 	select: function() {
 		if(!this.__editor.getSelectInserted()) {
