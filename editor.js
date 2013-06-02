@@ -333,6 +333,10 @@ function WysiwygEditor(ta, editor) {
 	this.init();
 }
 WysiwygEditor.prototype = {
+	//== Settings begin
+	shortifyColors: true, // #ffcc00 -> #fc0
+	//== Settings end
+
 	active: false,
 	init: function() {
 		this.available = this.getAvailable();
@@ -1320,10 +1324,12 @@ WysiwygEditor.prototype = {
 		"#ffff00": "Yellow",
 		"#9acd32": "YellowGreen"
 	},
-	getColorName: function(color) {
-		if(color in this.colors)
-			return this.colors[color];
-		return color;
+	getColorName: function(hex) {
+		if(hex in this.colors)
+			return this.colors[hex];
+		if(this.shortifyColors && /^#([\da-f])\1([\da-f])\2([\da-f])\3$/.test(hex))
+			return "#" + RegExp.$1 + RegExp.$2 + RegExp.$3;
+		return hex;
 	},
 	getNodeText: function(node) {
 		return node.textContent || node.innerText || node.nodeValue || "";
