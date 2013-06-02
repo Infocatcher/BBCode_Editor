@@ -799,7 +799,7 @@ WysiwygEditor.prototype = {
 					if(RegExp.$1)
 						size = RegExp.$1 == "-" ? "smaller" : "larger";
 					else {
-						var n = Number(RegExp.$2);
+						var n = +RegExp.$2;
 						if     (n <= 1) size = "x-small"; // xx-small
 						else if(n == 2) size = "small";
 						else if(n == 3) size = "medium";
@@ -991,7 +991,7 @@ WysiwygEditor.prototype = {
 				}
 				return isNew;
 			};
-			if((styles.fontWeight == "bold" || Number(styles.fontWeight) > 400) && isNew("fontWeight"))
+			if((styles.fontWeight == "bold" || styles.fontWeight > 400) && isNew("fontWeight"))
 				tagOpen += "[b]", tagClose = "[/b]" + tagClose;
 			if(styles.fontStyle == "italic" && isNew("fontStyle"))
 				tagOpen += "[i]", tagClose = "[/i]" + tagClose;
@@ -1163,9 +1163,9 @@ WysiwygEditor.prototype = {
 		if(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/.test(color))
 			return this.getColorName(
 				"#"
-				+ this.padLeft(Number(RegExp.$1).toString(16))
-				+ this.padLeft(Number(RegExp.$2).toString(16))
-				+ this.padLeft(Number(RegExp.$3).toString(16))
+				+ this.padLeft((+RegExp.$1).toString(16))
+				+ this.padLeft((+RegExp.$2).toString(16))
+				+ this.padLeft((+RegExp.$3).toString(16))
 			);
 		return color;
 	},
