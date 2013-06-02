@@ -1,5 +1,5 @@
 // (c) Infocatcher 2009-2013
-// version 0.4.0a5 - 2013-01-24
+// version 0.4.0a6 - 2013-06-03
 
 // https://github.com/Infocatcher/BBCode_Editor
 
