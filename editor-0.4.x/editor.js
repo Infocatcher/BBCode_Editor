@@ -1,5 +1,5 @@
 // (c) Infocatcher 2009-2013
-// version 0.4.0a5 - 2013-01-24
+// version 0.4.0a6 - 2013-06-03
 
 // https://github.com/Infocatcher/BBCode_Editor
 
@@ -333,6 +333,10 @@ function WysiwygEditor(ta, editor) {
 	this.init();
 }
 WysiwygEditor.prototype = {
+	//== Settings begin
+	shortifyColors: true, // #ffcc00 -> #fc0
+	//== Settings end
+
 	active: false,
 	init: function() {
 		this.available = this.getAvailable();
@@ -799,7 +803,7 @@ WysiwygEditor.prototype = {
 					if(RegExp.$1)
 						size = RegExp.$1 == "-" ? "smaller" : "larger";
 					else {
-						var n = Number(RegExp.$2);
+						var n = +RegExp.$2;
 						if     (n <= 1) size = "x-small"; // xx-small
 						else if(n == 2) size = "small";
 						else if(n == 3) size = "medium";
@@ -991,7 +995,7 @@ WysiwygEditor.prototype = {
 				}
 				return isNew;
 			};
-			if((styles.fontWeight == "bold" || Number(styles.fontWeight) > 400) && isNew("fontWeight"))
+			if((styles.fontWeight == "bold" || styles.fontWeight > 400) && isNew("fontWeight"))
 				tagOpen += "[b]", tagClose = "[/b]" + tagClose;
 			if(styles.fontStyle == "italic" && isNew("fontStyle"))
 				tagOpen += "[i]", tagClose = "[/i]" + tagClose;
@@ -1163,9 +1167,9 @@ WysiwygEditor.prototype = {
 		if(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/.test(color))
 			return this.getColorName(
 				"#"
-				+ this.padLeft(Number(RegExp.$1).toString(16))
-				+ this.padLeft(Number(RegExp.$2).toString(16))
-				+ this.padLeft(Number(RegExp.$3).toString(16))
+				+ this.padLeft((+RegExp.$1).toString(16))
+				+ this.padLeft((+RegExp.$2).toString(16))
+				+ this.padLeft((+RegExp.$3).toString(16))
 			);
 		return color;
 	},
@@ -1320,10 +1324,12 @@ WysiwygEditor.prototype = {
 		"#ffff00": "Yellow",
 		"#9acd32": "YellowGreen"
 	},
-	getColorName: function(color) {
-		if(color in this.colors)
-			return this.colors[color];
-		return color;
+	getColorName: function(hex) {
+		if(hex in this.colors)
+			return this.colors[hex];
+		if(this.shortifyColors && /^#([\da-f])\1([\da-f])\2([\da-f])\3$/.test(hex))
+			return "#" + RegExp.$1 + RegExp.$2 + RegExp.$3;
+		return hex;
 	},
 	getNodeText: function(node) {
 		return node.textContent || node.innerText || node.nodeValue || "";
