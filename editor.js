@@ -259,7 +259,7 @@ Editor.prototype = {
 			var sTop = ta.scrollTop;
 			var sHeight = ta.scrollHeight;
 			var sLeft = ta.scrollLeft;
-			// var sWidth = ta.scrollWidth;
+			//var sWidth = ta.scrollWidth;
 
 			var ss = ta.selectionStart;
 			var val = ta.value;
@@ -280,8 +280,9 @@ Editor.prototype = {
 				r.moveStart("character", -text.replace(/\r\n/g, "\n").length);
 			r.select();
 		}
-		else
+		else {
 			ta.value += text;
+		}
 	},
 	uriTagFromSel: function(tag, sel) {
 		sel = this.getSel();
@@ -446,15 +447,21 @@ WysiwygEditor.prototype = {
 				this._firstToggle = false;
 			}
 
-			try { document.execCommand("enableObjectResizing", false, false); }
-			catch(e) {}
+			try {
+				document.execCommand("enableObjectResizing", false, false);
+			}
+			catch(e) {
+			}
 			// Firefox bug (?)
 			// Without this we can get inline styles for <div contenteditable="true">
 			// And styles like <div contenteditable="true" style="... font-weight: bold;">
 			// can't be removed using "removeformat" command.
 			//~ todo: "useCSS" for old versions?
-			try { document.execCommand("styleWithCSS", false, false); }
-			catch(e) {}
+			try {
+				document.execCommand("styleWithCSS", false, false);
+			}
+			catch(e) {
+			}
 		}
 		else {
 			this.ta.focus();
@@ -514,7 +521,7 @@ WysiwygEditor.prototype = {
 			}
 		}
 		setTimeout(function() {
-			throw new Error("Can't get focused node!");
+			throw new Error("WysiwygEditor: Can't get focused node!");
 		}, 0);
 		return null;
 	},
@@ -523,26 +530,21 @@ WysiwygEditor.prototype = {
 			return;
 		var cmd;
 		switch(tag) {
-			case "b": cmd = "bold"; break;
-			case "i": cmd = "italic"; break;
-			case "u": cmd = "underline"; break;
-			case "s": cmd = "strikeThrough"; break;
-
-			case "font": cmd = "fontName"; break;
-			case "size": cmd = "fontSize"; break;
-			case "color": cmd = "foreColor"; break;
-			case "hr": cmd = "insertHorizontalRule"; break;
-
-			case "img": cmd = "insertImage"; break;
-			case "url": cmd = "createlink"; break;
-
-			case "center": cmd = "justifyCenter"; break;
-			case "left": cmd = "justifyLeft"; break;
-			case "right": cmd = "justifyRight"; break;
-
-			case "sub": cmd = "subscript"; break;
-			case "sup": cmd = "superscript"; break;
-
+			case "b":      cmd = "bold";                 break;
+			case "i":      cmd = "italic";               break;
+			case "u":      cmd = "underline";            break;
+			case "s":      cmd = "strikeThrough";        break;
+			case "font":   cmd = "fontName";             break;
+			case "size":   cmd = "fontSize";             break;
+			case "color":  cmd = "foreColor";            break;
+			case "hr":     cmd = "insertHorizontalRule"; break;
+			case "img":    cmd = "insertImage";          break;
+			case "url":    cmd = "createlink";           break;
+			case "center": cmd = "justifyCenter";        break;
+			case "left":   cmd = "justifyLeft";          break;
+			case "right":  cmd = "justifyRight";         break;
+			case "sub":    cmd = "subscript";            break;
+			case "sup":    cmd = "superscript";          break;
 			case "pre":
 				this.toggleBlockTag(tag);
 				return;
@@ -955,8 +957,9 @@ WysiwygEditor.prototype = {
 			}
 			return text;
 		}
-		else if(node.nodeType == 8 /*Node.COMMENT_NODE*/)
+		else if(node.nodeType == 8 /*Node.COMMENT_NODE*/) {
 			return "";
+		}
 
 		var tagOpen = "";
 		var tagClose = "";
@@ -1178,13 +1181,14 @@ WysiwygEditor.prototype = {
 			var cs = color.split("");
 			return this.getColorName("#" + (cs[1] + cs[1] + cs[2] + cs[2] + cs[3] + cs[3]).toLowerCase());
 		}
-		if(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/.test(color))
+		if(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i.test(color)) {
 			return this.getColorName(
 				"#"
 				+ this.padLeft((+RegExp.$1).toString(16))
 				+ this.padLeft((+RegExp.$2).toString(16))
 				+ this.padLeft((+RegExp.$3).toString(16))
 			);
+		}
 		return color;
 	},
 	padLeft: function(n) {
