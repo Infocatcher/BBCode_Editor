@@ -561,13 +561,12 @@ WysiwygEditor.prototype = {
 		return sel && sel.getRangeAt(0)
 			|| document.selection && document.selection.createRange();
 	},
-	getNodeFromSelection: function(checker) {
-		if(typeof checker == "string") {
-			var tag = checker;
-			checker = function(node) {
-				return node.nodeName.toLowerCase() == tag;
+	getNodeFromSelection: function(tagOrChecker) {
+		var checker = typeof tagOrChecker == "function"
+			? tagOrChecker
+			: function(node) {
+				return node.nodeName.toLowerCase() == tagOrChecker;
 			};
-		}
 		this.focus();
 		var rng = this.getRange();
 		if(!rng)
@@ -582,8 +581,8 @@ WysiwygEditor.prototype = {
 		}
 		return null;
 	},
-	removeTag: function(checker) {
-		var node = this.getNodeFromSelection(checker);
+	removeTag: function(tagOrChecker) {
+		var node = this.getNodeFromSelection(tagOrChecker);
 		if(!node)
 			return false;
 		var p = node.parentNode;
