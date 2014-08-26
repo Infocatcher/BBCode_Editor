@@ -58,6 +58,9 @@ Editor.prototype = {
 		},
 		"Quote author (you can leave this field empty):": {
 			ru: "Автор цитаты (можно оставить поле пустым):"
+		},
+		"image: ": {
+			ru: "изображение: "
 		}
 	},
 	_localize: function(s) {
@@ -720,7 +723,7 @@ WysiwygEditor.prototype = {
 		if(!attrs)
 			attrs = {};
 		if(!attrs.hasOwnProperty("alt"))
-			attrs.alt = src;
+			attrs.alt = this.getImageAlt(src);
 		var attrsStr = "";
 		for(var name in attrs) if(attrs.hasOwnProperty(name))
 			attrsStr += " " + name + '="' + this.encodeHTML(attrs[name]) + '"';
@@ -875,7 +878,7 @@ WysiwygEditor.prototype = {
 				if(!/^(?:https?|ftps?):\/\//i.test(src))
 					src = "http://" + src;
 				src = _this.encodeHTML(src);
-				return '<img src="' + src + '" alt="' + src + '"></img>';
+				return '<img src="' + src + '" alt="' + _this.getImageAlt(src) + '"></img>';
 			})
 
 			// Single tags
@@ -917,6 +920,9 @@ WysiwygEditor.prototype = {
 		}
 
 		return bb;
+	},
+	getImageAlt: function(src) {
+		return "[" + this.__editor._localize("image: ") + src + "]";
 	},
 	encodeHTML: function(s) {
 		return s
