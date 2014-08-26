@@ -96,7 +96,8 @@ Editor.prototype = {
 			var u = this.trim(sel);
 			if(!this.isValidURI(u)) {
 				var a = this.we.getNodeFromSelection("a");
-				u = prompt(this._localize("Link:"), a && a.href || "http://");
+				u = a && a.href || this.we.getUrlFromSelection() || "http://";
+				u = prompt(this._localize("Link:"), u);
 				if(a && u && !sel)
 					this.we.selectNodeContents(a);
 			}
@@ -580,6 +581,19 @@ WysiwygEditor.prototype = {
 				return node;
 		}
 		return null;
+	},
+	getUrlFromSelection: function() {
+		this.focus();
+		var rng = this.getRange();
+		if(!rng)
+			return "";
+		var tmp = document.createElement("div");
+		if(rng.cloneContents)
+			tmp.appendChild(rng.cloneContents());
+		else
+			tmp.innerHTML = rng.htmlText;
+		var links = tmp.getElementsByTagName("a");
+		return links.length && links[0].href || "";
 	},
 	removeTag: function(tagOrChecker) {
 		var node = this.getNodeFromSelection(tagOrChecker);
