@@ -1114,8 +1114,12 @@ WysiwygEditor.prototype = {
 				if(bbSize)
 					tagOpen += "[size=" + attrComma + bbSize + attrComma + "]", tagClose = "[/size]" + tagClose;
 			}
-			if(isNew("fontFamily") && (!_isPre || styles.fontFamily != preStyles.fontFamily))
-				tagOpen += "[font=" + attrComma + styles.fontFamily + attrComma + "]", tagClose = "[/font]" + tagClose;
+			if(isNew("fontFamily") && (!_isPre || styles.fontFamily != preStyles.fontFamily)) {
+				var fonts = styles.fontFamily.split(",");
+				for(var i = 0, l = fonts.length; i < l; ++i)
+					fonts[i] = fonts[i].replace(/^("|')(.*)\1$/, "$2");
+				tagOpen += "[font=" + attrComma + fonts.join(",") + attrComma + "]", tagClose = "[/font]" + tagClose;
+			}
 			if(isLink) {
 				//tagOpen += "[url=" + node.href + "]";
 				tagOpen += node.href == this.decodeHTML(node.innerHTML)
