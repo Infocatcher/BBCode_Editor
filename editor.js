@@ -18,6 +18,7 @@ function Editor(ta, options) {
 			this[p] = options[p];
 	if(this.language === undefined)
 		this.language = this.detectLanguage();
+	this.root = this.$(this.root || null) || document.body || document.documentElement;
 	this.we = new WysiwygEditor(ta, this);
 	this.onWysiwygToggle();
 
@@ -42,7 +43,7 @@ Editor.prototype = {
 	allowSizeUnits: false,
 	onWysiwygNA: function() {},
 	preMode: undefined, // WYSIWYG
-	root: document.documentElement, // Set to editor parent to use multiple editors
+	root: null, // Root node to set editor-noWysiwyg/editor-mode-plain/editor-mode-wysiwyg class
 	//== Settings end
 
 	strings: {
