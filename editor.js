@@ -963,6 +963,7 @@ WysiwygEditor.prototype = {
 
 		var tagOpen = "";
 		var tagClose = "";
+		var attrComma = this.__editor.attrComma;
 
 		if(node != _root) {
 			var nn = node.nodeName.toLowerCase();
@@ -1075,7 +1076,7 @@ WysiwygEditor.prototype = {
 				var _isSpoiler = true;
 			}
 			if(!_isSpoiler && styles.color && isNew("color")) {
-				tagOpen += "[color=" + this.convertColor(styles.color) + "]";
+				tagOpen += "[color=" + attrComma + this.convertColor(styles.color) + attrComma + "]";
 				tagClose = "[/color]" + tagClose;
 			}
 			if(!_ignoreSize && isNew("fontSize")) {
@@ -1111,13 +1112,15 @@ WysiwygEditor.prototype = {
 				)
 					bbSize = size;
 				if(bbSize)
-					tagOpen += "[size=" + bbSize + "]", tagClose = "[/size]" + tagClose;
+					tagOpen += "[size=" + attrComma + bbSize + attrComma + "]", tagClose = "[/size]" + tagClose;
 			}
 			if(isNew("fontFamily") && (!_isPre || styles.fontFamily != preStyles.fontFamily))
-				tagOpen += "[font=" + styles.fontFamily + "]", tagClose = "[/font]" + tagClose;
+				tagOpen += "[font=" + attrComma + styles.fontFamily + attrComma + "]", tagClose = "[/font]" + tagClose;
 			if(isLink) {
 				//tagOpen += "[url=" + node.href + "]";
-				tagOpen += node.href == this.decodeHTML(node.innerHTML) ? "[url]" : "[url=" + node.href + "]";
+				tagOpen += node.href == this.decodeHTML(node.innerHTML)
+					? "[url]"
+					: "[url=" + attrComma + node.href + attrComma + "]";
 				tagClose = "[/url]" + tagClose;
 			}
 			if(!hasBlockBBTag && styles.display == "block")
