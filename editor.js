@@ -719,7 +719,7 @@ WysiwygEditor.prototype = {
 		this.focus();
 		if(!attrs)
 			attrs = {};
-		else if(!attrs.hasOwnProperty("alt"))
+		if(!attrs.hasOwnProperty("alt"))
 			attrs.alt = src;
 		var attrsStr = "";
 		for(var name in attrs) if(attrs.hasOwnProperty(name))
