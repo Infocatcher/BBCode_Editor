@@ -53,7 +53,7 @@
 	<script type="text/javascript">
 		document.body.className = "jsEnabled";
 	</script>
-	<div>
+	<div id="editor">
 		<div id="text">
 			<button class="forJsEnabled" onclick='
 				var src = this.nextSibling;
@@ -181,6 +181,7 @@ tincidunt. Sed sed elit id erat hendrerit mattis.</span>
 		}
 		window.editor = new Editor("ta", {
 			//language: "ru",
+			//root: "editor",
 			selectInserted: document.getElementById("selectInserted").checked,
 			isVisual: document.getElementById("editor-isVisual").checked,
 			onWysiwygNA: function() {
