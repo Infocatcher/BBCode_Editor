@@ -25,9 +25,7 @@ function Editor(ta, options) {
 	ta.__editor = this;
 	eventListener.add(window, "unload", function() {
 		eventListener.remove(window, "unload", arguments.callee);
-		delete ta.__editor;
-		delete this.we.__editor;
-		delete this.we;
+		ta.__editor = this.we = this.ta = this.inputField = this.root = null;
 	}, this);
 }
 Editor.prototype = {
@@ -349,6 +347,7 @@ WysiwygEditor.prototype = {
 		if(!this.available) {
 			this.__editor.isVisual = false;
 			this.__editor._onWysiwygNA();
+			this.destroy();
 			return;
 		}
 
@@ -374,8 +373,11 @@ WysiwygEditor.prototype = {
 			eventListener.remove(document, "click",     fh, true);
 			if(this.active)
 				this.ta.value = this.getBBCode(); // Fails sometimes ?
-			this.__editor = null;
+			this.destroy();
 		}, this);
+	},
+	destroy: function() {
+		this.__editor = this.__editor.ww = this.ta = this.ww = null;
 	},
 	_smileysInitialized: false,
 	initSmileys: function() {
