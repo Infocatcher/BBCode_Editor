@@ -32,6 +32,20 @@
 		}
 		.fix-mozFocusInner .button-plain:focus { outline: 1px dotted; outline-offset: -1px; }
 
+		.button-bold         { font-weight: bold; }
+		.button-italic       { font-style: italic; }
+		.button-underline    { text-decoration: underline; }
+		.button-strike       { text-decoration: line-through; }
+		.button-sub          {}
+		.button-sup          {}
+		.button-pre          { font-family: monospace; }
+		.button-url          { text-decoration: underline; color: #00e; }
+		.button-url-remove   { text-decoration: line-through; color: #00e; }
+		.button-img          {}
+		.button-quote        {}
+		.button-color        {}
+		.button-removeFormat {}
+
 		.editor-noWysiwyg #editor-isVisualOption {
 			opacity: 0.6;
 			filter: alpha(opacity=60);
@@ -94,20 +108,20 @@ tincidunt. Sed sed elit id erat hendrerit mattis.</span>
 			</div>
 		</noscript>
 		<div id="buttons" class="forJsEnabled">
-			<button onclick="editor.tag(event, 'b');" accesskey="B">B</button>
-			<button onclick="editor.tag(event, 'i');" accesskey="I">I</button>
-			<button onclick="editor.tag(event, 'u');" accesskey="N">U</button>
-			<button onclick="editor.tag(event, 's');" accesskey="S">S</button>
+			<button onclick="editor.tag(event, 'b');" accesskey="B" class="button-bold">B</button>
+			<button onclick="editor.tag(event, 'i');" accesskey="I" class="button-italic">I</button>
+			<button onclick="editor.tag(event, 'u');" accesskey="N" class="button-underline">U</button>
+			<button onclick="editor.tag(event, 's');" accesskey="S" class="button-strike">S</button>
 
-			<button onclick="editor.tag(event, 'sub');">Sub</button>
-			<button onclick="editor.tag(event, 'sup');">Sup</button>
-			<button onclick="editor.tag(event, 'pre');">Pre</button>
+			<button onclick="editor.tag(event, 'sub');" class="button-sub">Sub↓</button>
+			<button onclick="editor.tag(event, 'sup');" class="button-sup">Sup↑</button>
+			<button onclick="editor.tag(event, 'pre');" class="button-pre">Pre</button>
 
-			<button onclick="editor.urlTag(event);" accesskey="U">URL</button>
-			<button class="editor-forWysisyg" onclick="editor.removeUrlTag(event);" accesskey="R">-URL</button>
-			<button onclick="editor.imgTag(event);" accesskey="M">IMG</button>
-			<button onclick="editor.quoteTag(event);" accesskey="Q">Quote</button>
-			<button onclick="editor.tag(event, 'color', this.nextSibling.value);" accesskey="C">Color:
+			<button onclick="editor.urlTag(event);" accesskey="U" class="button-url">URL</button>
+			<button onclick="editor.removeUrlTag(event);" accesskey="R" class="button-url-remove editor-forWysisyg">URL</button>
+			<button onclick="editor.imgTag(event);" accesskey="M" class="button-img">Image</button>
+			<button onclick="editor.quoteTag(event);" accesskey="Q" class="button-quote">“Quote”</button>
+			<button onclick="editor.tag(event, 'color', this.nextSibling.value);" accesskey="C" class="button-color">Color:
 			</button><select
 				onmousedown="this.__event = event || window.event;"
 				onchange="editor.tag(this.__event || event, 'color', this.value); this.style.color = this.value;">
@@ -122,7 +136,7 @@ tincidunt. Sed sed elit id erat hendrerit mattis.</span>
 				with(document.getElementsByTagName("select")[0])
 					style.color = value;
 			</script>
-			<button class="editor-forWysisyg" onclick="editor.we.removeFormatting();">Remove Formatting</button>
+			<button onclick="editor.we.removeFormatting();" class="button-removeFormat editor-forWysisyg">Remove Formatting</button>
 		</div>
 		<div id="smileys" class="forJsEnabled">Smileys:</div>
 		<div id="settings" class="forJsEnabled">
