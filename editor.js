@@ -345,7 +345,7 @@ WysiwygEditor.prototype = {
 
 	active: false,
 	init: function() {
-		this.available = this.getAvailable();
+		this.available = "execCommand" in document && this.ww.contentEditable == "true";
 		if(!this.available) {
 			this.__editor.isVisual = false;
 			this.__editor._onWysiwygNA();
@@ -493,9 +493,6 @@ WysiwygEditor.prototype = {
 			newHTML = removeSpaces(newHTML);
 		}
 		return oldHTML == newHTML;
-	},
-	getAvailable: function() {
-		return "execCommand" in document && this.ww.contentEditable == "true";
 	},
 	getFocusedNode: function(e) {
 		if("activeElement" in document)
