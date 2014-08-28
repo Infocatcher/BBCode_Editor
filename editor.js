@@ -25,6 +25,7 @@ function Editor(ta, options) {
 	ta.__editor = this;
 	eventListener.add(window, "unload", function() {
 		eventListener.remove(window, "unload", arguments.callee);
+		this.we.destroy();
 		ta.__editor = this.we = this.ta = this.inputField = this.root = null;
 	}, this);
 }
@@ -347,7 +348,7 @@ WysiwygEditor.prototype = {
 		if(!this.available) {
 			this.__editor.isVisual = false;
 			this.__editor._onWysiwygNA();
-			this.destroy();
+			this.destroyRefs();
 			return;
 		}
 
@@ -365,18 +366,17 @@ WysiwygEditor.prototype = {
 		eventListener.add(window,   "focus",     fh, this, true);
 		eventListener.add(document, "mousedown", fh, this, true);
 		eventListener.add(document, "click",     fh, this, true);
-
-		eventListener.add(window, "unload", function() {
-			eventListener.remove(window, "unload", arguments.callee);
-			eventListener.remove(window,   "focus",     fh, true);
-			eventListener.remove(document, "mousedown", fh, true);
-			eventListener.remove(document, "click",     fh, true);
-			if(this.active)
-				this.ta.value = this.getBBCode(); // Fails sometimes ?
-			this.destroy();
-		}, this);
 	},
 	destroy: function() {
+		var fh = this.focusHandler;
+		eventListener.remove(window,   "focus",     fh, true);
+		eventListener.remove(document, "mousedown", fh, true);
+		eventListener.remove(document, "click",     fh, true);
+		if(this.active)
+			this.ta.value = this.getBBCode(); // Fails sometimes ?
+		this.destroyRefs();
+	},
+	destroyRefs: function() {
 		this.__editor = this.__editor.ww = this.ta = this.ww = null;
 	},
 	_smileysInitialized: false,
