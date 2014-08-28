@@ -46,6 +46,8 @@ Editor.prototype = {
 	onWysiwygToggle: function() {},
 	preMode: undefined, // WYSIWYG
 	root: null, // Root node to set editor-noWysiwyg/editor-mode-plain/editor-mode-wysiwyg class
+	backupEnabled: true,
+	backupInterval: 15e3,
 	//== Settings end
 
 	strings: {
@@ -322,6 +324,8 @@ Editor.prototype = {
 	_backupTimer: 0,
 	_savedData: "",
 	initBackups: function() {
+		if(!this.backupEnabled)
+			return;
 		if("localStorage" in window) try {
 			this.storage = localStorage;
 		}
@@ -332,10 +336,11 @@ Editor.prototype = {
 		this.backupKey = "editor:" + this.ta.id + ":backup";
 		this.backupTimeKey = this.backupKey + ":time";
 		var _this = this;
-		this._backupTimer = setInterval(function() {
-			_this.backup();
-		}, 15e3);
-		var _this = this;
+		if(this.backupInterval > 0) {
+			this._backupTimer = setInterval(function() {
+				_this.backup();
+			}, this.backupInterval);
+		}
 		setTimeout(function() { // Pseudo async (accessing storage may be slow)
 			_this.showBackupControls();
 		}, 0);
