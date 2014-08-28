@@ -18,7 +18,7 @@ function Editor(ta, options) {
 			this[p] = options[p];
 	if(this.language === undefined)
 		this.language = this.detectLanguage();
-	this.root = this.$(this.root || null) || document.body || document.documentElement;
+	this.root = this.$(this.root) || document.body || document.documentElement;
 	this.we = new WysiwygEditor(ta, this);
 	this._onWysiwygToggle();
 	this.initBackups();
