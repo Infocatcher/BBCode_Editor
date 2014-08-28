@@ -133,8 +133,10 @@ tincidunt. Sed sed elit id erat hendrerit mattis.</span>
 				<option value="silver" style="color: silver;">Silver</option>
 			</select>
 			<script type="text/javascript">
-				with(document.getElementsByTagName("select")[0])
-					style.color = value;
+				(function() {
+					var select = document.getElementsByTagName("select")[0];
+					select.style.color = select.value;
+				})();
 			</script>
 			<button onclick="editor.we.removeFormatting();" class="button-removeFormat editor-forWysisyg">Remove Formatting</button>
 		</div>
