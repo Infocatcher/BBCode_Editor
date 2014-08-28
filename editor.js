@@ -324,6 +324,7 @@ Editor.prototype = {
 	_backupTimer: 0,
 	_savedData: "",
 	initBackups: function() {
+		this.addClass(this.root, "editor-noBackup");
 		if(!this.backupEnabled)
 			return;
 		if("localStorage" in window) try {
@@ -348,13 +349,13 @@ Editor.prototype = {
 	showBackupControls: function() {
 		var data = this.getBackupData();
 		if(
-			!data || (
+			data && !(
 				this.isVisual // Restored by browser itself?
 					? this.ww.hasChildNodes()
 					: this.ta.value
 			)
 		)
-			this.addClass(this.root, "editor-noBackup");
+			this.removeClass(this.root, "editor-noBackup");
 	},
 	lastBackup: function() {
 		if(!this.storage)
