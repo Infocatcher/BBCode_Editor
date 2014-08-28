@@ -108,6 +108,10 @@ tincidunt. Sed sed elit id erat hendrerit mattis.</span>
 			</div>
 		</noscript>
 		<div id="buttons" class="forJsEnabled">
+			<div id="buttons-restore" class="editor-forBackup">
+				<button onclick="editor.restoreBackup();">Restore</button>
+				<button onclick="editor.clearBackup();">Clear backup</button>
+			</div>
 			<button onclick="editor.tag(event, 'b');" accesskey="B" class="button-bold">B</button>
 			<button onclick="editor.tag(event, 'i');" accesskey="I" class="button-italic">I</button>
 			<button onclick="editor.tag(event, 'u');" accesskey="N" class="button-underline">U</button>
@@ -144,7 +148,7 @@ tincidunt. Sed sed elit id erat hendrerit mattis.</span>
 		<div id="settings" class="forJsEnabled">
 			<label id="editor-isVisualOption" for="editor-isVisual">
 				<input value="plain" id="editor-isVisual" type="checkbox" checked="checked" accesskey="E"
-					 onclick="editor.toggle(this.checked);" />
+					onclick="editor.toggle(this.checked);" />
 				Visual editor
 			</label>
 			<label for="selectInserted" title="Hold any modifier during click on button to temporary toggle this option">

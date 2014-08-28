@@ -50,7 +50,8 @@
 }
 
 .editor-mode-plain .editor-forWysisyg,
-.editor-mode-wysiwyg .editor-forPlain {
+.editor-mode-wysiwyg .editor-forPlain,
+.editor-noBackup .editor-forBackup {
 	display: none;
 }
 

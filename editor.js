@@ -21,10 +21,12 @@ function Editor(ta, options) {
 	this.root = this.$(this.root || null) || document.body || document.documentElement;
 	this.we = new WysiwygEditor(ta, this);
 	this._onWysiwygToggle();
+	this.initBackups();
 
 	ta.__editor = this;
 	eventListener.add(window, "unload", function() {
 		eventListener.remove(window, "unload", arguments.callee);
+		this.lastBackup();
 		this.we.destroy();
 		ta.__editor = this.we = this.ta = this.inputField = this.root = null;
 	}, this);
@@ -178,6 +180,15 @@ Editor.prototype = {
 		this.we.toggle();
 		this._onWysiwygToggle();
 	},
+	restoreBackup: function() {
+		this.restoreFromBackup();
+		this.clearBackupData();
+		this.focus();
+	},
+	clearBackup: function() {
+		this.clearBackupData();
+		this.focus();
+	},
 	focus: function() {
 		if(this.isVisual)
 			this.we.focus();
@@ -306,6 +317,92 @@ Editor.prototype = {
 		);
 		return true;
 	},
+
+	storage: null,
+	_backupTimer: 0,
+	_savedData: "",
+	initBackups: function() {
+		if("localStorage" in window) try {
+			this.storage = localStorage;
+		}
+		catch(e) {
+		}
+		if(!this.storage)
+			return;
+		this.backupKey = "editor:" + this.ta.id + ":backup";
+		this.backupTimeKey = this.backupKey + ":time";
+		var _this = this;
+		this._backupTimer = setInterval(function() {
+			_this.backup();
+		}, 15e3);
+		var _this = this;
+		setTimeout(function() { // Pseudo async (accessing storage may be slow)
+			_this.showBackupControls();
+		}, 0);
+	},
+	showBackupControls: function() {
+		var data = this.getBackupData();
+		if(
+			!data || (
+				this.isVisual // Restored by browser itself?
+					? this.ww.hasChildNodes()
+					: this.ta.value
+			)
+		)
+			this.addClass(this.root, "editor-noBackup");
+	},
+	lastBackup: function() {
+		if(!this.storage)
+			return;
+		clearInterval(this._backupTimer);
+		this.backup();
+		this.storage = null;
+	},
+	backup: function() {
+		var data = this.isVisual
+			? "html:" + this.ww.innerHTML
+			: "text:" + this.ta.value;
+		if(data != this._savedData && data.length > 5) {
+			this._savedData = data;
+			this.storage.setItem(this.backupKey, data);
+			this.storage.setItem(this.backupTimeKey, new Date().getTime());
+		}
+	},
+	getBackupData: function() {
+		if(!this.storage)
+			return "";
+		var time = this.storage.getItem(this.backupTimeKey);
+		if(!time)
+			return "";
+		if(new Date().getTime() - time > 24*60*60*1000) { // Too old
+			this.clearBackupData();
+			return "";
+		}
+		var data = this.storage.getItem(this.backupKey);
+		if(!data || data.length <= 5)
+			return "";
+		return data;
+	},
+	clearBackupData: function() {
+		if(!this.storage)
+			return;
+		this.storage.removeItem(this.backupTimeKey);
+		this.storage.removeItem(this.backupKey);
+		this.addClass(this.root, "editor-noBackup");
+	},
+	restoreFromBackup: function() {
+		var data = this.getBackupData();
+		if(!data)
+			return;
+		var isHtml = data.substr(0, 5) == "html:";
+		data = data.substr(5);
+		this.toggle(isHtml);
+		if(isHtml)
+			this.ww.innerHTML = data;
+		else
+			this.ta.value = data;
+	},
+
 	isValidURI: function(uri) {
 		return this.validURIMask.test(uri);
 	},
