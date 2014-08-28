@@ -20,7 +20,7 @@ function Editor(ta, options) {
 		this.language = this.detectLanguage();
 	this.root = this.$(this.root || null) || document.body || document.documentElement;
 	this.we = new WysiwygEditor(ta, this);
-	this.onWysiwygToggle();
+	this._onWysiwygToggle();
 
 	ta.__editor = this;
 	eventListener.add(window, "unload", function() {
@@ -41,6 +41,7 @@ Editor.prototype = {
 	onlyTagsCloseTagNum: 3, // Number of brackets with ([/tag])
 	allowSizeUnits: false,
 	onWysiwygNA: function() {},
+	onWysiwygToggle: function() {},
 	preMode: undefined, // WYSIWYG
 	root: null, // Root node to set editor-noWysiwyg/editor-mode-plain/editor-mode-wysiwyg class
 	//== Settings end
@@ -175,7 +176,7 @@ Editor.prototype = {
 		if(visualMode != undefined && visualMode == this.isVisual)
 			return;
 		this.we.toggle();
-		this.onWysiwygToggle();
+		this._onWysiwygToggle();
 	},
 	focus: function() {
 		if(this.isVisual)
@@ -185,13 +186,15 @@ Editor.prototype = {
 	},
 	//== API end
 
-	onWysiwygToggle: function() {
+	_onWysiwygToggle: function() {
 		var root = this.root;
-		this.setClass(root, "editor-mode-plain", !this.isVisual);
-		this.setClass(root, "editor-mode-wysiwyg", this.isVisual);
+		var isVisual = this.isVisual;
+		this.setClass(root, "editor-mode-plain", !isVisual);
+		this.setClass(root, "editor-mode-wysiwyg", isVisual);
+		this.onWysiwygToggle(isVisual);
 	},
 	_onWysiwygNA: function() {
-		this.onWysiwygToggle();
+		this._onWysiwygToggle();
 		var root = this.root;
 		this.addClass(root, "editor-noWysiwyg");
 		this.onWysiwygNA();
