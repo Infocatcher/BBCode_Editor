@@ -193,13 +193,13 @@ tincidunt. Sed sed elit id erat hendrerit mattis.</span>
 			if(s.width == w) // Nothing changed, don't override :focus styles
 				root.className = c;
 		}
+		var isVisual = document.getElementById("editor-isVisual");
 		window.editor = new Editor("ta", {
 			//language: "ru",
 			//root: "editor",
 			selectInserted: document.getElementById("selectInserted").checked,
-			isVisual: document.getElementById("editor-isVisual").checked,
+			isVisual: isVisual.checked,
 			onWysiwygNA: function() {
-				var isVisual = document.getElementById("editor-isVisual");
 				isVisual.checked = false;
 				isVisual.parentNode.title = "Your browser doesn't support visual editor";
 				isVisual.disabled = true;
