@@ -334,7 +334,7 @@ Editor.prototype = {
 		}
 		if(!this.storage)
 			return;
-		this.backupKey = "editor:" + this.ta.id + ":backup";
+		this.backupKey = "editor:" + this.ta.id || this.ta.name + ":backup";
 		this.backupTimeKey = this.backupKey + ":time";
 		var _this = this;
 		if(this.backupInterval > 0) {
