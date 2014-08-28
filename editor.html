@@ -193,16 +193,20 @@ tincidunt. Sed sed elit id erat hendrerit mattis.</span>
 			if(s.width == w) // Nothing changed, don't override :focus styles
 				root.className = c;
 		}
-		var isVisual = document.getElementById("editor-isVisual");
+		var isVisualCb = document.getElementById("editor-isVisual");
 		window.editor = new Editor("ta", {
 			//language: "ru",
 			//root: "editor",
 			selectInserted: document.getElementById("selectInserted").checked,
-			isVisual: isVisual.checked,
+			isVisual: isVisualCb.checked,
 			onWysiwygNA: function() {
-				isVisual.checked = false;
-				isVisual.parentNode.title = "Your browser doesn't support visual editor";
-				isVisual.disabled = true;
+				isVisualCb.checked = false;
+				isVisualCb.parentNode.title = "Your browser doesn't support visual editor";
+				isVisualCb.disabled = true;
+			},
+			onWysiwygToggle: function(isVisual) {
+				if(isVisualCb.checked != isVisual)
+					isVisualCb.checked = isVisual;
 			},
 			smileys: smileys
 		});
