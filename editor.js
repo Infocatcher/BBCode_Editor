@@ -1515,8 +1515,7 @@ var resizer = {
 	startResize: function(e) {
 		if(e.button != 0)
 			return;
-		if(this.area)
-			this.stopResize();
+		this.stopResize();
 		var tar = e.target;
 		var rsType = this.getResizeType(e);
 		if(!rsType)
@@ -1550,6 +1549,8 @@ var resizer = {
 			: clss;
 	},
 	stopResize: function(e) {
+		if(!this.area)
+			return;
 		eventListener.remove(document, "mousemove", this.doResize);
 		this.area = null;
 		this.setResizeCursor(null);
