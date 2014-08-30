@@ -334,8 +334,10 @@ Editor.prototype = {
 		}
 		if(!this.storage)
 			return;
-		this.backupKey = "editor:" + (this.ta.id || this.ta.name) + ":backup";
-		this.backupTimeKey = this.backupKey + ":time";
+		var key = location.pathname.replace(/[^\/]+$/, "") // foo/index.php -> foo/
+			+ "#" + (this.ta.id || this.ta.name);
+		this.backupKey = "editor:backup" + key;
+		this.backupTimeKey = "editor:backupTime" + key;
 		var _this = this;
 		if(this.backupInterval > 0) {
 			this._backupTimer = setInterval(function() {
