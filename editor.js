@@ -760,16 +760,16 @@ WysiwygEditor.prototype = {
 		}
 	},
 	select: function() {
-		if(!this.__editor.getSelectInserted()) {
-			var sel = window.getSelection && window.getSelection()
-				|| document.getSelection && document.getSelection();
-			if(sel)
-				sel.collapseToEnd();
-			else {
-				var r = document.selection.createRange();
-				r.collapse(false);
-				r.select();
-			}
+		if(this.__editor.getSelectInserted())
+			return;
+		var sel = window.getSelection && window.getSelection()
+			|| document.getSelection && document.getSelection();
+		if(sel)
+			sel.collapseToEnd();
+		else {
+			var r = document.selection.createRange();
+			r.collapse(false);
+			r.select();
 		}
 	},
 	insertHTML: function(html, selectInserted, onlyTagsShift) {
