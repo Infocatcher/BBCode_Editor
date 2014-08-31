@@ -47,8 +47,8 @@ Editor.prototype = {
 	preMode: undefined, // WYSIWYG
 	root: null, // Root node to set editor-noWysiwyg/editor-mode-plain/editor-mode-wysiwyg class
 	backupEnabled: true,
-	backupInterval: 15e3,
-	backupExpire: 24*60*60e3,
+	backupInterval: 15e3, // Delay between autobackups or -1 to disable
+	backupExpire: 24*60*60e3, // Don't use (and remove) older backups
 	//== Settings end
 
 	strings: {
