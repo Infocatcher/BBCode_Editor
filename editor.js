@@ -890,6 +890,7 @@ WysiwygEditor.prototype = {
 			}
 		);
 
+		var br = this.preMode ? "<br/>" : "<br/>\n";
 		var _this = this;
 		bb = bb
 			// Simple tags
@@ -987,7 +988,7 @@ WysiwygEditor.prototype = {
 			.replace(/\[hr(\s*\/)?\]/g, "<hr/>")
 			.replace(/\[br(\s*\/)?\]/g, "<br/>")
 
-			.replace(/\n/g, "<br/>\n")
+			.replace(/\n/g, br)
 
 			.replace(/\[pre\]([\s\S]+?)\[\/pre\]/ig, function(s, code) {
 				code = code.replace(/<br\/?>\n/, "\n"); // Undo nl2br()
