@@ -917,11 +917,7 @@ WysiwygEditor.prototype = {
 			.replace(/\[spoiler\]/ig, '<span class="bb-spoiler-inline" style="color: black; background: black;">')
 			.replace(/\[\/spoiler\]/ig, "</span>")
 
-			//.replace(/\[pre\]/ig, "<pre>")
-			//.replace(/\[\/pre\]/ig, "</pre>")
-
 			// Tags with parameters
-
 			.replace(/\[size=('|"|&quot;)?(.+?)\1\]/ig, function(s, comma, size) {
 				// +1, -1, 3, etc.
 				if(/^(\+|-)?(\d+)$/.test(size)) {
