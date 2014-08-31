@@ -48,6 +48,7 @@ Editor.prototype = {
 	root: null, // Root node to set editor-noWysiwyg/editor-mode-plain/editor-mode-wysiwyg class
 	backupEnabled: true,
 	backupInterval: 15e3,
+	backupExpire: 24*60*60e3,
 	//== Settings end
 
 	strings: {
@@ -382,7 +383,7 @@ Editor.prototype = {
 		var time = this.storage.getItem(this.backupTimeKey);
 		if(!time)
 			return "";
-		if(new Date().getTime() - time > 24*60*60*1000) { // Too old
+		if(new Date().getTime() - time > this.backupExpire) { // Too old
 			this.clearBackupData();
 			return "";
 		}
