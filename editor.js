@@ -41,10 +41,11 @@ Editor.prototype = {
 	validURIMask: /^(\w+:\/+[^\s\/\\'"?&#]+(\/\S*)?|\w+:[^\s\/\\'"?&#]+)$/,
 	onlyTagsMask: /^\[(\w+)([^\[\]]+)?\](\[\/\1\])$/,
 	onlyTagsCloseTagNum: 3, // Number of brackets with ([/tag])
-	allowSizeUnits: false,
 	onWysiwygNA: function() {},
 	onWysiwygToggle: function() {},
+	allowSizeUnits: false,
 	preMode: undefined, // WYSIWYG
+	shortifyColors: true, // #ffcc00 -> #fc0
 	root: null, // Root node to set editor-noWysiwyg/editor-mode-plain/editor-mode-wysiwyg class
 	backupEnabled: true,
 	backupInterval: 15e3, // Delay between autobackups or -1 to disable
@@ -447,10 +448,6 @@ function WysiwygEditor(ta, editor) {
 	this.init();
 }
 WysiwygEditor.prototype = {
-	//== Settings begin
-	shortifyColors: true, // #ffcc00 -> #fc0
-	//== Settings end
-
 	active: false,
 	init: function() {
 		this.available = "execCommand" in document && this.ww.contentEditable == "true";
@@ -465,6 +462,7 @@ WysiwygEditor.prototype = {
 		this.preMode = preMode === undefined
 			? /(^|-)pre(-|$)/.test(this.getStyles(this.ww, "whiteSpace"))
 			: !!preMode;
+		this.shortifyColors = this.__editor.shortifyColors;
 		if(this.__editor.isVisual)
 			this.toggle();
 
