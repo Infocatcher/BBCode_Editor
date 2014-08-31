@@ -445,25 +445,25 @@ function WysiwygEditor(ta, editor) {
 	this.ta = ta;
 	this.__editor = editor;
 	this.ww = editor.ww = ta.nextSibling;
-	this.init();
+	this.init(editor);
 }
 WysiwygEditor.prototype = {
 	active: false,
-	init: function() {
+	init: function(editor) {
 		this.available = "execCommand" in document && this.ww.contentEditable == "true";
 		if(!this.available) {
-			this.__editor.isVisual = false;
-			this.__editor._onWysiwygNA();
+			editor.isVisual = false;
+			editor._onWysiwygNA();
 			this.destroyRefs();
 			return;
 		}
 
-		var preMode = this.__editor.preMode;
+		var preMode = editor.preMode;
 		this.preMode = preMode === undefined
 			? /(^|-)pre(-|$)/.test(this.getStyles(this.ww, "whiteSpace"))
 			: !!preMode;
-		this.shortifyColors = this.__editor.shortifyColors;
-		if(this.__editor.isVisual)
+		this.shortifyColors = editor.shortifyColors;
+		if(editor.isVisual)
 			this.toggle();
 
 		if("onresizestart" in this.ww) // IE
